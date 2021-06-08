@@ -1,0 +1,483 @@
+/* ======================== BODY =================== */
+
+.body-content{
+    margin-top: 3%;
+}
+
+.body-container{
+    display: grid;
+    /* grid-template-columns: auto auto auto auto auto auto; */
+    width: 1140px;
+    height: auto;
+    margin: 100px auto;
+}
+
+.content-left{
+    /* grid-column: 1 / span 4; */
+    height: auto;
+    width: 60%;
+    /* background: rgb(253, 215, 215); */
+}
+
+.content-right{
+    position: fixed;
+    top:10;
+    width: 370px;
+    margin-left: 770px;
+    height: 100vh;
+    /* border:1px solid #f8eaeae5; */
+}   
+
+
+/* ======================== CONTENT-LEFT =================== */
+
+#avt-content{
+    float: left;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#ellipsis{
+    margin-top: 10px;
+    float: right;
+    color: black;
+}
+
+#img-content{
+    /* cursor: pointer; */
+    margin-top: 20px;
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+}
+
+#icon-tick{
+    cursor: pointer;
+    float: right;
+    font-size: 25px;
+    color: black;
+    font-weight: 1;
+}
+
+#like{
+    text-decoration: none;
+    font-size: 15px;
+    color: black;
+    letter-spacing: -.2px;
+}
+
+
+#p-bold-content{
+    float: left;
+    text-decoration: none;
+    color: black;
+    font-size: 15px;
+    font-weight: bold;
+    margin-left: 20px;
+    margin-top: 15px;
+}
+
+#name-title-content{
+    float: left;
+    margin-right: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+}
+
+#span-hour{
+    color: #979696c5;
+    font-size: 14px;
+    letter-spacing: -.2px;
+}
+
+#title-post{
+    letter-spacing: -0.8    x;
+}
+
+#all-comment{
+    color: #2b2a2ac5;
+    font-size: 14px;
+    letter-spacing: -.2px;
+}
+
+#icon-smile{
+    color: black;
+    font-size: 25px;
+    font-weight: 1;
+    height: 100%;
+    width: 10%;
+}
+
+#input-comment{
+    width: 100%;
+    height: 70%;
+    border: none;
+    outline: none;
+    border-radius: 2px;
+    resize: none;
+    /* overflow: overlay; */
+    overflow: overlay;
+}
+
+#submit-Comment{
+    text-decoration: none;
+}
+
+
+#submit-Comment p{
+    color: #0f9bf7;
+    text-decoration: none;
+    width: 15%;
+    height: 100%;
+    font-weight: 1000;
+    
+}  
+
+#a-modal{
+    text-decoration: none;
+    color: black;
+    font-size: 15px;
+}
+
+#p-modal{
+    padding: 5px;
+}
+
+#p-modal-red{
+    padding: 5px;
+    color: red;
+    font-weight: bold;
+}
+
+.content-left-bottom{
+    height: 100%;
+    width: 100%;
+    margin-top: 80px;
+}
+
+.like-share{
+    margin: 20px;
+    line-height: 2;
+}
+
+.icon-like-share{
+    cursor: pointer;
+    font-size: 25px;
+    color: black;
+    font-weight: 400;
+    margin-right: 15px;
+}
+
+.item-left{
+    margin: 0px 5%;    
+    margin-bottom: 50px;
+    width: 90%;
+    /* height: 100%; */
+    border: 1px solid #dbdbdb;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px 0px;
+}
+
+.content-left-top{
+    margin: 30px;
+}
+
+.comment{
+    display: flex;
+    width:100%;
+    height: 50px;
+    border-top: 1px solid #dbdbdb;
+}
+
+.comment-left{
+    display: flex;
+    width: 10%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-between{
+    display: flex;
+    width: 75%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-right{
+    display: flex;
+    width: 15%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;   
+}
+
+.modal {
+    display: none;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(255,255,255,0.6); /* Black w/ opacity */
+    text-align: center;   
+}
+
+.modal-content{
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    background-color: #fefefe;
+    width: 500px;
+    height: 255px;
+    transition: all .2s;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px 5px;
+    padding: 0px 10px;
+}
+
+.content-modal{
+    padding: 10px;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+/* ======================== END CONTENT-LEFT =================== */
+
+/* ======================== CONTENT-RIGHT =================== */
+
+#avt-right{
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#p-avt-right{
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}
+
+#suggestion{
+    padding: 10px;
+    color: #979696c5;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+
+#watch-all{
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: -0.5px;
+    color: #2b2a2ac5;
+}
+
+#avt-sugges{
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#name-sugges{
+    color: black;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#name-sugges:hover{
+    text-decoration: underline;
+}
+
+#follow-sugges{
+    text-decoration: none;
+    color:rgb(97, 223, 255);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#follow-sugges:hover{
+    color:rgb(58, 146, 168);
+}
+
+
+.item-right{
+    width: 90%;
+    height: 100vh;
+    margin: 5%;
+}
+
+.right-top{
+    display: flex;
+    width: 100%;
+    height: 80px;
+}
+
+.avt-right{
+    display: flex;
+    width: 30%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.p-avt-right{
+    display: flex;
+    width:  70%;
+    height: 100%;
+    font-size: 15px;
+    align-items: center;
+}
+
+.right-bottom{
+    width: 100%;
+    height: auto;
+}
+
+.right-bottom-top{
+    display: flex;
+    width: 100%;
+    height: 50px;
+    /* border-bottom: 1px solid black; */
+}
+
+.right-bottom-bottom{
+    display: flex;
+    width: 100%;
+    height: 300px;
+}
+
+.suggestion{
+    display: flex;
+    width: 50%;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.watch-all{
+    display: flex;
+    width: 50%;
+    height: 100%;
+    justify-content: flex-end;
+    align-items: center;
+} 
+
+.avt-sugges{
+    display: flex;
+    height: 50px;
+    width: 20%;
+    justify-content: center;
+    align-items: center;
+}
+
+.name-sugges{
+    display: flex;
+    height: 50px;
+    width: 60%;
+    align-items: center;
+}
+
+.follow-sugges{
+    display: flex;
+    height: 50px;
+    width: 20%;
+    align-items: center;
+}
+
+
+/* ======================== END CONTENT-RIGHT =================== */
+
+
+/* ======================== END BODY =================== */
+
+
+* {box-sizing:border-box}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 100%;
+  position: relative;
+  margin: auto;
+}
+
+/* Hide the images by default */
+.mySlides {
+  display: none;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  height: 7px;
+  width: 7px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 1.5s;
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+@keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+.visible{
+    display: none;
+}
