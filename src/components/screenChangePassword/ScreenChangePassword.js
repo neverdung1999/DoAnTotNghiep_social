@@ -1,6 +1,5 @@
 import React from "react";
 import "./screenChangePassword.css";
-import logo from "../../uploads/img/duc.jpg";
 import { connect } from "react-redux";
 
 function ScreenChangePassword(props) {
@@ -14,7 +13,7 @@ function ScreenChangePassword(props) {
     <div className="backgroundChangePassword">
       <div className="backgroundChangePassword_top">
         <div className="backgroundChangePassword_top-left">
-          <img src={dataPersonal?.imageSrc} id="top_left-img" />
+          <img src={dataPersonal?.imageSrc} id="top_left-img" alt="" />
         </div>
         <div className="backgroundChangePassword_top-right">
           {dataPersonal?.username}

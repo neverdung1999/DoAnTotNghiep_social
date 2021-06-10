@@ -91,9 +91,9 @@ export const logoutUser = () => {
 
 // ------------------------------------------------------  PERSONAL USER ------------------------------------------------------
 
-export const personalRequest = (setShowLoading, dataId) => {
+export const personalRequest = (setShowLoading, username) => {
   return (dispatch) => {
-    return CallApi("GET", `/user?id=${dataId}`, null)
+    return CallApi("GET", `/user?username=${username}`, null)
       .then((response) => {
         setShowLoading(false);
         dispatch(personal(response));

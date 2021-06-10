@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./screenEditPersonal.css";
 import Cookies from "universal-cookie";
 import { connect } from "react-redux";
-import logo from "../../uploads/img/duc.jpg";
 import * as Action from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
@@ -66,7 +65,7 @@ function ScreenEditPersonal(props) {
             </label>
           </div>
           <div className="right_avt-bottom">
-            <img src={dataUser?.imageSrc} id="avt_bottom-img" />
+            <img src={dataUser?.imageSrc} id="avt_bottom-img" alt="" />
           </div>
         </div>
         <div className="form_right-name">

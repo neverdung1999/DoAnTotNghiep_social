@@ -7,7 +7,6 @@ import { applyMiddleware, createStore } from "redux";
 import { Provider } from "react-redux";
 import appReducers from "./redux/reducers/Index";
 import thunk from "redux-thunk";
-// import "./generator"
 
 const store = createStore(appReducers, applyMiddleware(thunk));
 

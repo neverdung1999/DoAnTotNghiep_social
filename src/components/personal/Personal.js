@@ -19,23 +19,20 @@ function Personal(props) {
   const [idContentFollow, setIdContentFollow] = useState(0);
   const [openChangeAvt, setOpenChangeAvt] = useState(false);
   const [openFromAddNews, setOpenFormAddNews] = useState(false);
-  const [openContentFollow, setOpenContentFollow] = useState(false);
   const [openEditPersonal, setOpenEditPersonal] = useState(false);
-
-  console.log(window.location.href);
+  const [openContentFollow, setOpenContentFollow] = useState(false);
+  const [getDataUrl, setGetDataUrl] = useState(window.location.href.slice(31));
 
   useEffect(() => {
     if (!cookies.get("user")) {
       history.push("/");
     } else {
-      if (history?.location?.state?.id) {
-        props.personalRequest(setShowLoading, history?.location?.state?.id);
-      } else {
-        props.personalRequest(
-          setShowLoading,
-          history?.location?.state?.id_account
-        );
-      }
+      history.location.state
+        ? props.personalRequest(
+            setShowLoading,
+            history.location.pathname.slice(10)
+          )
+        : getDataUrl && props.personalRequest(setShowLoading, getDataUrl);
       setDataUser(dataUserApi);
     }
   }, [dataUserApi]);
@@ -203,8 +200,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, props) => {
   return {
-    personalRequest: (setShowLoading, dataId) => {
-      dispatch(Action.personalRequest(setShowLoading, dataId));
+    personalRequest: (setShowLoading, username) => {
+      dispatch(Action.personalRequest(setShowLoading, username));
     },
   };
 };

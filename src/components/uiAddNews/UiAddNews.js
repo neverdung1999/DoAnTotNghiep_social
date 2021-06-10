@@ -95,7 +95,7 @@ function AddNews(props) {
                       className="img_loading-column"
                       style={{ maxWidth: "50%" }}
                     >
-                      <img src={value} id="img_loading" />
+                      <img src={value} id="img_loading" alt="" />
                     </div>
                   );
                 })
@@ -104,7 +104,7 @@ function AddNews(props) {
                   className="img_loading-column"
                   style={{ maxWidth: "100%" }}
                 >
-                  <img src={img} id="img_loading" />
+                  <img src={img} id="img_loading" alt="" />
                 </div>
               )}
             </div>

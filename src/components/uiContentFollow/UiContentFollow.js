@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./uiContentFollow.css";
 import { connect } from "react-redux";
 import * as Action from "../../redux/actions/Index";
@@ -12,8 +12,9 @@ function UiContentFollow(props) {
   };
 
   const removeFr = (id) => {
+    console.log(id);
     removeFriend(id);
-  };
+  };;
 
   return (
     <div style={openContentFollow ? { display: "block" } : { display: "none" }}>
