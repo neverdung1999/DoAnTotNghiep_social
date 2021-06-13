@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./screenEditPersonal.css";
 import Cookies from "universal-cookie";
 import { connect } from "react-redux";
@@ -6,9 +6,12 @@ import * as Action from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function ScreenEditPersonal(props) {
-  const { changeAvtRequest, dataUser } = props;
+  const { changeAvtRequest } = props;
   const cookies = new Cookies();
+  const dataCookies = cookies.get("data");
   const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {}, [dataCookies]);
 
   const callApiImage = (value) => {
     const formData = new FormData();
@@ -53,7 +56,6 @@ function ScreenEditPersonal(props) {
         <div className="form_right-avt">
           <div className="right_avt-top">
             <div className="avt_top-left">Ảnh đại diện</div>
-            {/* <div className="avt_top-right">Chỉnh sửa</div> */}
             <label className="avt_top-right">
               <input
                 type="file"
@@ -65,7 +67,7 @@ function ScreenEditPersonal(props) {
             </label>
           </div>
           <div className="right_avt-bottom">
-            <img src={dataUser?.imageSrc} id="avt_bottom-img" alt="" />
+            <img src={dataCookies?.imageSrc} id="avt_bottom-img" alt="" />
           </div>
         </div>
         <div className="form_right-name">
@@ -117,12 +119,6 @@ function ScreenEditPersonal(props) {
   );
 }
 
-const mapStateToProps = (state) => {
-  return {
-    dataUser: state.Personal,
-  };
-};
-
 const mapDispatchToProps = (dispatch) => {
   return {
     changeAvtRequest: (idUser, response, setShowLoading) => {
@@ -131,4 +127,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ScreenEditPersonal);
+export default connect(null, mapDispatchToProps)(ScreenEditPersonal);

@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
-import Cookies from "universal-cookie";
 import { connect } from "react-redux";
+import Cookies from "universal-cookie";
+import * as actions from "../../redux/actions/Index";
+import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Index(props) {
   const { history } = props;
   const cookies = new Cookies();
+  const idCookies = cookies.get("user");
+  const userCookies = cookies.get("username");
+  const [showLoading, setShowLoading] = useState(true);
+
+  console.log(idCookies);
 
   useEffect(() => {
     if (!cookies.get("user")) {
       history.push("/login");
+    } else {
+      props.personalRequestById(setShowLoading, userCookies);
     }
   }, [cookies.get("user")]);
 
   return (
     <div>
+      <GlobalLoading showLoading={showLoading} />
       <div className="body-content">
         <div className="body-container">
           <div className="content-left">
@@ -196,4 +206,12 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(Index);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    personalRequestById: (setShowLoading, username) => {
+      return dispatch(actions.personalRequest(setShowLoading, username));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Index);

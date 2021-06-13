@@ -6,8 +6,10 @@ import * as Action from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function ChangeAvt(props) {
-  const { changeAvtRequest, openChangeAvt, dataUser } = props;
+  const { changeAvtRequest, openChangeAvt, dataUser, getDataUrl, userHistory } =
+    props;
   const cookies = new Cookies();
+  const userCookies = cookies.get("username");
   const [isOpenForm, setIsOpenForm] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
 
@@ -17,7 +19,6 @@ function ChangeAvt(props) {
 
   const callApiImage = (value) => {
     const formData = new FormData();
-    const idCookies = cookies.get("user");
     let idUser = "";
     if (dataUser.id) {
       idUser = dataUser?.id;
@@ -72,15 +73,28 @@ function ChangeAvt(props) {
             alt=""
             id="backgroundChangeAvt_form-img"
           />
-          <label className="backgroundChangeAvt_form-edit">
-            <input
-              type="file"
-              id="form_edit-input"
-              onChange={handleChangeImage}
-              style={{ opacity: 0 }}
-            />
-            <div className="form_edit-title">Chỉnh sửa</div>
-          </label>
+          {userCookies === getDataUrl && (
+            <label className="backgroundChangeAvt_form-edit">
+              <input
+                type="file"
+                id="form_edit-input"
+                onChange={handleChangeImage}
+                style={{ opacity: 0 }}
+              />
+              <div className="form_edit-title">Chỉnh sửa</div>
+            </label>
+          )}
+          {userCookies === userHistory && (
+            <label className="backgroundChangeAvt_form-edit">
+              <input
+                type="file"
+                id="form_edit-input"
+                onChange={handleChangeImage}
+                style={{ opacity: 0 }}
+              />
+              <div className="form_edit-title">Chỉnh sửa</div>
+            </label>
+          )}
         </div>
       </div>
     </div>

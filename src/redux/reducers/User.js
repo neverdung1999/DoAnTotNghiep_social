@@ -62,6 +62,8 @@ const authen = (state = initialState, action) => {
       return state;
     case Types.LOGOUT_USER:
       cookies.remove("user");
+      cookies.remove("username");
+      cookies.remove("data");
       return state;
     default:
       return state;

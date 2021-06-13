@@ -9,6 +9,7 @@ const Personal = (state = initalState, action) => {
     case Types.PERSONAL_USER:
       const data = action.data.data;
       data.id === cookies.get("user") && cookies.set("data", data);
+      action.setShowLoading(false);
       state = data;
       return state;
     default:

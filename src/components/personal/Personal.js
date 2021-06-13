@@ -3,9 +3,11 @@ import "./personal.css";
 import _ from "lodash";
 import Cookies from "universal-cookie";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import AddNews from "../uiAddNews/UiAddNews";
 import ChangeAvt from "../changeAvt/ChangeAvt";
 import * as Action from "../../redux/actions/Index";
+import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
 import UiEditPersonal from "../uiEditPersonal/UiEditPersonal";
 import UiContentFollow from "../uiContentFollow/UiContentFollow";
 import PersonalContent from "../personalContent/PersonalContent";
@@ -14,19 +16,25 @@ import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 function Personal(props) {
   const { history, dataUserApi } = props;
   const cookies = new Cookies();
+  const idUser = cookies.get("user");
+  const dataCookies = cookies.get("data");
   const [dataUser, setDataUser] = useState(null);
   const [showLoading, setShowLoading] = useState(true);
+  const userHistory = history?.location?.state?.username;
   const [idContentFollow, setIdContentFollow] = useState(0);
   const [openChangeAvt, setOpenChangeAvt] = useState(false);
+  const [checkUserFollow, setCheckUserFollow] = useState(null);
   const [openFromAddNews, setOpenFormAddNews] = useState(false);
+  const [openFormUnfollow, setOpenFormUnfollow] = useState(false);
   const [openEditPersonal, setOpenEditPersonal] = useState(false);
   const [openContentFollow, setOpenContentFollow] = useState(false);
   const [getDataUrl, setGetDataUrl] = useState(window.location.href.slice(31));
 
   useEffect(() => {
-    if (!cookies.get("user")) {
+    if (!idUser) {
       history.push("/");
     } else {
+      const dataFollowing = dataCookies?.following;
       history.location.state
         ? props.personalRequest(
             setShowLoading,
@@ -34,6 +42,21 @@ function Personal(props) {
           )
         : getDataUrl && props.personalRequest(setShowLoading, getDataUrl);
       setDataUser(dataUserApi);
+      if (dataFollowing?.length !== 0) {
+        for (let i = 0; i < dataFollowing?.length; i++) {
+          if (
+            dataFollowing[i]?.username === getDataUrl ||
+            history?.location?.state?.username === dataFollowing[i]?.username
+          ) {
+            setCheckUserFollow(1);
+            return;
+          } else {
+            setCheckUserFollow(-1);
+          }
+        }
+      } else {
+        setCheckUserFollow(-1);
+      }
     }
   }, [dataUserApi]);
 
@@ -56,11 +79,12 @@ function Personal(props) {
     setOpenFormAddNews(true);
   };
 
-  const onCloseForm = () => {
-    setOpenFormAddNews(false);
-    setOpenChangeAvt(false);
-    setOpenContentFollow(false);
-    setOpenEditPersonal(false);
+  const onCloseForm = (e) => {
+    setOpenFormAddNews(e);
+    setOpenChangeAvt(e);
+    setOpenContentFollow(e);
+    setOpenEditPersonal(e);
+    setOpenFormUnfollow(e);
   };
 
   const onOpenChangeAvt = () => {
@@ -74,6 +98,15 @@ function Personal(props) {
 
   const showEditPersonal = () => {
     setOpenEditPersonal(true);
+  };
+
+  const handleFollow = () => {
+    setShowLoading(true);
+    props.followFriendRequest(dataUserApi.id, setShowLoading);
+  };
+
+  const openUnfollow = () => {
+    setOpenFormUnfollow(true);
   };
 
   const ContentFollow = (id) => {
@@ -112,9 +145,15 @@ function Personal(props) {
         openChangeAvt={openChangeAvt}
         onCloseForm={onCloseForm}
         history={history}
+        getDataUrl={getDataUrl}
+        userHistory={userHistory}
       />
       <AddNews openFromAddNews={openFromAddNews} onCloseForm={onCloseForm} />
       <GlobalLoading showLoading={showLoading} />
+      <UiFormUnfollow
+        openFormUnfollow={openFormUnfollow}
+        onCloseForm={onCloseForm}
+      />
 
       {ContentFollow()}
 
@@ -136,7 +175,7 @@ function Personal(props) {
                 <h2 id="top_left-h2">{dataUser?.username}</h2>
               </div>
               <div className="right_top-right">
-                {cookies.get("user") === dataUserApi.id ? (
+                {idUser === dataUserApi.id ? (
                   <div className="personal_edit">
                     <div onClick={() => showAddNews()}>
                       <button id="top_right-message">
@@ -152,11 +191,33 @@ function Personal(props) {
                       </div>
                     </div>
                   </div>
+                ) : checkUserFollow === -1 ? (
+                  <div className="addfr">
+                    <button
+                      id="top_right-message"
+                      onClick={() => handleFollow()}
+                    >
+                      Theo dõi
+                    </button>
+                  </div>
                 ) : (
                   <div className="addfr">
-                    <button id="top_right-message">Nhắn tin</button>
-                    <button id="top_right-message">
-                      <i className="fas fa-user"></i> Bạn bè
+                    <Link
+                      to={{ pathname: "/chat", state: dataUserApi }}
+                      id="top_right-message"
+                      style={{
+                        textDecoration: "none",
+                        padding: "5px 10px",
+                        fontSize: 15,
+                      }}
+                    >
+                      Nhắn tin
+                    </Link>
+                    <button
+                      id="top_right-message"
+                      onClick={() => openUnfollow()}
+                    >
+                      <i className="fas fa-user"></i> Đang theo dõi
                     </button>
                   </div>
                 )}
@@ -202,6 +263,9 @@ const mapDispatchToProps = (dispatch, props) => {
   return {
     personalRequest: (setShowLoading, username) => {
       dispatch(Action.personalRequest(setShowLoading, username));
+    },
+    followFriendRequest: (id, setShowLoading) => {
+      dispatch(Action.followFriendRequest(id, setShowLoading));
     },
   };
 };

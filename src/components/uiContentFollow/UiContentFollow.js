@@ -1,23 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import "./uiContentFollow.css";
 import { connect } from "react-redux";
-import * as Action from "../../redux/actions/Index";
 import { Link } from "react-router-dom";
+import Cookies from "universal-cookie";
+import * as Action from "../../redux/actions/Index";
+import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function UiContentFollow(props) {
   const { openContentFollow, name, dataFollow, removeFriend } = props;
+  const cookies = new Cookies();
+  const userCookies = cookies.get("username");
+  const [showLoading, setShowLoading] = useState(false);
 
   const closeForm = () => {
     props.onCloseForm(false);
   };
 
   const removeFr = (id) => {
-    console.log(id);
-    removeFriend(id);
-  };;
+    setShowLoading(true);
+    removeFriend(id, setShowLoading);
+  };
 
   return (
     <div style={openContentFollow ? { display: "block" } : { display: "none" }}>
+      <GlobalLoading showLoading={showLoading} />
       <div className="backgroundContentFollow">
         <div className="backgroundContentFollow_form">
           <div className="backgroundContentFollow_form-top">
@@ -52,12 +58,14 @@ function UiContentFollow(props) {
                     </div>
                   </div>
                   <div className="form_bottom-right">
-                    <p
-                      id="bottom_right-delete"
-                      onClick={() => removeFr(value.id_account)}
-                    >
-                      Xóa
-                    </p>
+                    {value.username !== userCookies && (
+                      <p
+                        id="bottom_right-delete"
+                        onClick={() => removeFr(value.id_account)}
+                      >
+                        Xóa
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -77,8 +85,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    removeFriend: (id) => {
-      dispatch(Action.removeFriendRequest(id));
+    removeFriend: (id, setShowLoading) => {
+      dispatch(Action.removeFriendRequest(id, setShowLoading));
     },
   };
 };

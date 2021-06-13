@@ -11,13 +11,12 @@
 
 #top_right-message{
   height: 30px;
-  padding: 0px 10px;
+  padding: 0px 20px;
   border: 1px solid #dbdbdb;
   border-radius: 5px;
   background-color: white;
   color: #262626;
-  font-weight: bold;
-  margin-left: 8px;
+  margin-left: 10px;
 }
 
 #top_left-h2{

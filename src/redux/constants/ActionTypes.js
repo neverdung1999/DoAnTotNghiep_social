@@ -5,3 +5,4 @@ export const PERSONAL_USER = "PERSONAL_USER";
 export const LOGOUT_USER = "LOGOUT_USER";
 export const REMOVE_STATE = "REMOVE_STATE";
 export const CHANGE_AVT = "CHANGE_AVT";
+export const MY_USER = "MY_USER";

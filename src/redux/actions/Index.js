@@ -4,6 +4,7 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 const idUser = cookies.get("user");
+const username = cookies.get("username");
 
 // ------------------------------------------------------ LOGIN USER ------------------------------------------------------
 
@@ -91,12 +92,12 @@ export const logoutUser = () => {
 
 // ------------------------------------------------------  PERSONAL USER ------------------------------------------------------
 
-export const personalRequest = (setShowLoading, username) => {
+export const personalRequestById = (setShowLoading, id) => {
   return (dispatch) => {
-    return CallApi("GET", `/user?username=${username}`, null)
+    return CallApi("GET", `/user?id=${id}`, null)
       .then((response) => {
         setShowLoading(false);
-        dispatch(personal(response));
+        dispatch(personal(response, setShowLoading));
       })
       .catch((error) => {
         console.log(error);
@@ -104,10 +105,24 @@ export const personalRequest = (setShowLoading, username) => {
   };
 };
 
-export const personal = (data) => {
+export const personalRequest = (setShowLoading, username) => {
+  return (dispatch) => {
+    return CallApi("GET", `/user?username=${username}`, null)
+      .then((response) => {
+        setShowLoading(false);
+        dispatch(personal(response, setShowLoading));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+};
+
+export const personal = (data, setShowLoading) => {
   return {
     type: Types.PERSONAL_USER,
     data,
+    setShowLoading,
   };
 };
 
@@ -122,7 +137,7 @@ export const changeAvtRequest = (idUser, response, setShowLoading) => {
       imageSrc: response,
     })
       .then((res) => {
-        dispatch(personalRequest(setShowLoading));
+        dispatch(getMyUserRequest(setShowLoading));
       })
       .catch((err) => {
         console.log(err);
@@ -134,13 +149,56 @@ export const changeAvtRequest = (idUser, response, setShowLoading) => {
 
 // ------------------------------------------------------  REMOVE FRIEND ------------------------------------------------------
 
-export const removeFriendRequest = (id) => {
+export const removeFriendRequest = (id, setShowLoading) => {
   return (dispatch) => {
-    return CallApi("DELETE", "/user/follow", {
-      myId: idUser,
-      followingId: id,
-    }).then((res) => console.log(res));
+    return CallApi(
+      "DELETE",
+      `/user/follow?myId=${idUser}&followingId=${id}`
+    ).then((res) => {
+      dispatch(getMyUserRequest(setShowLoading));
+    });
   };
 };
 
 // ------------------------------------------------------ END REMOVE FRIEND ------------------------------------------------------
+
+// ------------------------------------------------------  FOLLOW FRIEND ------------------------------------------------------
+
+export const followFriendRequest = (id, setShowLoading) => {
+  return (dispatch) => {
+    return CallApi("POST", `/user/follow?myId=${idUser}&followingId=${id}`)
+      .then((res) => {
+        dispatch(getMyUserRequest(setShowLoading));
+      })
+      .catch((err) => console.log(err));
+  };
+};
+
+// ------------------------------------------------------ END FOLLOW FRIEND ------------------------------------------------------
+
+// ------------------------------------------------------ GET MY USER ------------------------------------------------------
+
+export const getMyUserRequest = (setShowLoading) => {
+  return (dispatch) => {
+    return CallApi("GET", `/user?username=${username}`, null)
+      .then((response) => {
+        console.log(response);
+        setShowLoading(false);
+        dispatch(getMyUser(response));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+};
+
+export const getMyUser = (data) => {
+  return {
+    type: Types.MY_USER,
+    data,
+  };
+};
+
+// ------------------------------------------------------ END GET MY USER ------------------------------------------------------
+
+

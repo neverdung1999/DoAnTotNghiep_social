@@ -1,7 +1,8 @@
 import React from "react";
 import routers from "./routers";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { auth } from "./services/firebase";
 import Header from "./components/header/Header";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 function App(props) {
   const showContentComponents = (routers) => {
