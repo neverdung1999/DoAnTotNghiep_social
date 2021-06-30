@@ -19,8 +19,8 @@ function PersonalContent(props) {
   useEffect(() => {
     if (idDataUserApi !== undefined) {
       isRender && props.getPostRequestById(setShowLoading, idDataUserApi);
+      setIsRender(false);
     }
-    setIsRender(false);
     setDataNewsPost(dataPost.reverse());
   }, [dataPost, props, isRender, idCookies, idDataUserApi]);
 
