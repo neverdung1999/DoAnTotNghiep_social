@@ -7,18 +7,22 @@ import { Link } from "react-router-dom";
 import AddNews from "../uiAddNews/UiAddNews";
 import ChangeAvt from "../changeAvt/ChangeAvt";
 import * as Action from "../../redux/actions/Index";
+import { LinearProgress } from "diginet-core-ui/components";
 import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
 import UiEditPersonal from "../uiEditPersonal/UiEditPersonal";
 import UiContentFollow from "../uiContentFollow/UiContentFollow";
 import PersonalContent from "../personalContent/PersonalContent";
-import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Personal(props) {
-  const { history, dataUserApi } = props;
+  const { history, dataUserApi, dataPost } = props;
   const cookies = new Cookies();
   const idUser = cookies.get("user");
+  const username = cookies.get("username");
   const dataCookies = cookies.get("data");
+  const [isRender, setIsRender] = useState(true);
   const [dataUser, setDataUser] = useState(null);
+  const [numberPost, setNumberPost] = useState(0);
+  const getDataUrl = window.location.href.slice(31);
   const [showLoading, setShowLoading] = useState(true);
   const userHistory = history?.location?.state?.username;
   const [idContentFollow, setIdContentFollow] = useState(0);
@@ -28,37 +32,62 @@ function Personal(props) {
   const [openFormUnfollow, setOpenFormUnfollow] = useState(false);
   const [openEditPersonal, setOpenEditPersonal] = useState(false);
   const [openContentFollow, setOpenContentFollow] = useState(false);
-  const [getDataUrl, setGetDataUrl] = useState(window.location.href.slice(31));
 
   useEffect(() => {
+
     if (!idUser) {
       history.push("/");
     } else {
-      const dataFollowing = dataCookies?.following;
-      history.location.state
-        ? props.personalRequest(
+      if (history.location.state) {
+        isRender &&
+          props.personalRequest(
             setShowLoading,
             history.location.pathname.slice(10)
-          )
-        : getDataUrl && props.personalRequest(setShowLoading, getDataUrl);
-      setDataUser(dataUserApi);
-      if (dataFollowing?.length !== 0) {
-        for (let i = 0; i < dataFollowing?.length; i++) {
-          if (
-            dataFollowing[i]?.username === getDataUrl ||
-            history?.location?.state?.username === dataFollowing[i]?.username
-          ) {
-            setCheckUserFollow(1);
-            return;
-          } else {
-            setCheckUserFollow(-1);
-          }
-        }
+          );
+        setIsRender(false);
       } else {
-        setCheckUserFollow(-1);
+        if (isRender) {
+          getDataUrl && props.personalRequest(setShowLoading, getDataUrl);
+          setIsRender(false);
+        }
       }
+
+      setDataUser(dataUserApi);
+
+      if (!_.isEmpty(dataUserApi) && dataUserApi?.username !== username) {
+        if (!_.isEmpty(dataUserApi?.followers)) {
+          for (let i = 0; i < _.size(dataUserApi?.followers); i++) {
+            if (dataUserApi?.followers[i]?.username === username) {
+              setCheckUserFollow(1);
+              return;
+            } else {
+              setCheckUserFollow(-1);
+            }
+          }
+        } else {
+          setCheckUserFollow(-1);
+        }
+      }
+
+      let countPost = 0;
+      dataPost?.forEach((data) => {
+        if (data?.id_account === dataUserApi?.id) {
+          countPost += 1;
+        }
+      });
+      setNumberPost(countPost);
     }
-  }, [dataUserApi]);
+  }, [
+    dataUserApi,
+    dataCookies?.following,
+    getDataUrl,
+    history,
+    idUser,
+    isRender,
+    props,
+    username,
+    dataPost,
+  ]);
 
   const valueFollow = [
     {
@@ -102,7 +131,11 @@ function Personal(props) {
 
   const handleFollow = () => {
     setShowLoading(true);
-    props.followFriendRequest(dataUserApi.id, setShowLoading);
+    props.followFriendRequest(
+      dataUserApi.id,
+      setShowLoading,
+      history.location.pathname.slice(10)
+    );
   };
 
   const openUnfollow = () => {
@@ -113,24 +146,28 @@ function Personal(props) {
     switch (idContentFollow) {
       case 1:
         return (
-          <UiContentFollow
-            openContentFollow={openContentFollow}
-            onCloseForm={onCloseForm}
-            name={valueFollow[0].name2}
-            dataFollow={dataUser?.followers}
-          />
+          openContentFollow && (
+            <UiContentFollow
+              onCloseForm={onCloseForm}
+              name={valueFollow[0].name2}
+              dataFollow={dataUser?.followers}
+              setOpenContentFollow={setOpenContentFollow}
+            />
+          )
         );
       case 2:
         return (
-          <UiContentFollow
-            openContentFollow={openContentFollow}
-            onCloseForm={onCloseForm}
-            name={valueFollow[1].name1}
-            dataFollow={dataUser?.following}
-          />
+          openContentFollow && (
+            <UiContentFollow
+              onCloseForm={onCloseForm}
+              name={valueFollow[1].name1}
+              dataFollow={dataUser?.following}
+              setOpenContentFollow={setOpenContentFollow}
+            />
+          )
         );
       default:
-        return <UiContentFollow />;
+        return openContentFollow && <UiContentFollow />;
     }
   };
 
@@ -148,15 +185,25 @@ function Personal(props) {
         getDataUrl={getDataUrl}
         userHistory={userHistory}
       />
-      <AddNews openFromAddNews={openFromAddNews} onCloseForm={onCloseForm} />
-      <GlobalLoading showLoading={showLoading} />
-      <UiFormUnfollow
-        openFormUnfollow={openFormUnfollow}
+      <AddNews
+        openFromAddNews={openFromAddNews}
+        setOpenFormAddNews={setOpenFormAddNews}
         onCloseForm={onCloseForm}
       />
+      {showLoading && (
+        <LinearProgress
+          color="#d82b7d"
+          duration={1}
+          height={3}
+          percent={75}
+          showValue
+          valuePosition="top"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
+        />
+      )}
+      {openFormUnfollow && <UiFormUnfollow onCloseForm={onCloseForm} />}
 
       {ContentFollow()}
-
       <div className="bodyContainer">
         <div className="bodyContainer_top">
           <div className="bodyContainer_top-left">
@@ -203,7 +250,16 @@ function Personal(props) {
                 ) : (
                   <div className="addfr">
                     <Link
-                      to={{ pathname: "/chat", state: dataUserApi }}
+                      to={{
+                        pathname: "/chat",
+                        state: {
+                          id: dataUserApi.id,
+                          name: dataUserApi.name,
+                          username: dataUserApi.username,
+                          imageSrc: dataUserApi.imageSrc,
+                        },
+                        id: 1,
+                      }}
                       id="top_right-message"
                       style={{
                         textDecoration: "none",
@@ -225,7 +281,7 @@ function Personal(props) {
             </div>
             <div className="bodyContainerTop_right-body">
               <p id="right_body-p">
-                <span id="right_body-bold">5</span> bài viết
+                <span id="right_body-bold">{numberPost}</span> bài viết
               </p>
               {valueFollow.map((value, index) => {
                 return (
@@ -248,7 +304,7 @@ function Personal(props) {
           </div>
         </div>
       </div>
-      <PersonalContent />
+      <PersonalContent idDataUserApi={dataUserApi?.id} />
     </div>
   );
 }
@@ -256,16 +312,17 @@ function Personal(props) {
 const mapStateToProps = (state) => {
   return {
     dataUserApi: state.Personal,
+    dataPost: state.Post,
   };
 };
 
-const mapDispatchToProps = (dispatch, props) => {
+const mapDispatchToProps = (dispatch) => {
   return {
     personalRequest: (setShowLoading, username) => {
       dispatch(Action.personalRequest(setShowLoading, username));
     },
-    followFriendRequest: (id, setShowLoading) => {
-      dispatch(Action.followFriendRequest(id, setShowLoading));
+    followFriendRequest: (id, setShowLoading, username) => {
+      dispatch(Action.followFriendRequest(id, setShowLoading, username));
     },
   };
 };

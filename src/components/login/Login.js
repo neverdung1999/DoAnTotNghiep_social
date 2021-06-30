@@ -92,7 +92,7 @@ function Login(props) {
 
   return (
     <div style={isLogin ? { display: "none" } : { display: "block" }}>
-      <GlobalLoading showLoading={showLoading} />
+      {showLoading && <GlobalLoading />}
       <div className="container">
         <div className="container_content">
           <div className="containerContent_left">

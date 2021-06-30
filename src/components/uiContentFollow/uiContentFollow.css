@@ -14,13 +14,12 @@
 #bottom_right-delete{
     cursor: pointer;
     display: flex;
-    width: 50px;
-    height: 30px;
     justify-content: center;
     align-items: center;
     border-radius: 5px;
     font-size: 13px;
     border: 1px solid #dbdbdb;
+    padding: 5px 15px;
 }
 
 #bottom_right-delete:hover{
@@ -89,7 +88,7 @@
 
 .form_bottom-left{
     display: flex;
-    width: 80%;
+    width: 70%;
     height: 70px;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
@@ -97,7 +96,7 @@
 
 .form_bottom-right{
     display: flex;
-    width: 20%;
+    width: 30%;
     height: 70px;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -118,24 +117,37 @@
 .bottom_left-title{
     width: 75%;
     height: 100%;
+    overflow: hidden;
 }
 
 .left_title-top{
     cursor: pointer;
-    display: flex;
     width: 100%;
     height: 50%;
-    align-items: flex-end;
     padding-bottom: 5px;
     font-size: 14px;
     font-weight: bold;
 }
 
+.left_title-top p {
+    padding-top: 14px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis ;
+    white-space: nowrap;
+}
+
 .left_title-bottom{
     width: 100%;
     height: 50%;
-    padding-top: 5px;
     font-size: 13px;
     color: #ab8e9d;
+}
+
+.left_title-bottom p {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 

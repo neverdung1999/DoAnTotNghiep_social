@@ -78,6 +78,14 @@ label {
   height: 650px;
 }
 
+#formAddfr_top-close{
+  cursor: pointer;
+  position: absolute;
+  font-size: 20px;
+  right: 20px;
+  top: 15px;
+}
+
 .backgroundAddfr {
   position: fixed;
   width: 100%;
@@ -85,6 +93,7 @@ label {
   background-color: rgba(255, 255, 255, 0.8);
   top: 0;
   left: 0;
+  z-index: 102;
 }
 
 .backgroundAddfr_form {
@@ -102,6 +111,7 @@ label {
 }
 
 .backgroundAddfr_form-top {
+  position: relative;
   display: flex;
   width: 100%;
   height: 10%;

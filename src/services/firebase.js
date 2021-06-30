@@ -1,4 +1,6 @@
 import firebase from "firebase";
+import "firebase/auth";
+import "firebase/database";
 
 const config = {
   apiKey: "AIzaSyDpmA6bZfQPfLpqcThyXQwG3SbHJnnpyow",
@@ -6,5 +8,8 @@ const config = {
   databaseURL:
     "https://api-social-network-4c66d-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
+
 firebase.initializeApp(config);
+
+export const auth = firebase.auth;
 export const db = firebase.database();

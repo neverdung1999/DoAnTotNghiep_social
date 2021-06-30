@@ -128,8 +128,8 @@ button{
 }
 
 .search_nav-wrapper{
-    width: 100%;
-    height: 100%;
+    position: fixed;
+    width: 550px;
     padding: 5px 120px;
 }
 
@@ -229,4 +229,8 @@ button{
 .test{
     width: 200px;
     background: red;
+}
+
+.sc-bwzfXH .bWZouD{
+    background-color: red;
 }

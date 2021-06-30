@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./changeAvt.css";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
@@ -12,6 +12,8 @@ function ChangeAvt(props) {
   const userCookies = cookies.get("username");
   const [isOpenForm, setIsOpenForm] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {}, [dataUser]);
 
   const onCloseForm = () => {
     props.onCloseForm(false);
@@ -35,7 +37,7 @@ function ChangeAvt(props) {
       .then((response) => response.json())
       .then((response) => {
         setShowLoading(true);
-        changeAvtRequest(idUser, response.url, setShowLoading);
+        changeAvtRequest(idUser, response.url, setShowLoading, userCookies);
       })
       .catch((error) => {
         console.log(error);
@@ -56,7 +58,7 @@ function ChangeAvt(props) {
 
   return (
     <div>
-      <GlobalLoading showLoading={showLoading} />
+      {showLoading && <GlobalLoading />}
       <div
         className="backgroundChangeAvt"
         onClick={isOpenForm ? () => onCloseForm() : null}
@@ -101,12 +103,20 @@ function ChangeAvt(props) {
   );
 }
 
+const mapStateToProps = (state) => {
+  return {
+    dataUser: state.Personal,
+  };
+};
+
 const mapDispatchToProps = (dispatch) => {
   return {
-    changeAvtRequest: (idUser, response, setShowLoading) => {
-      dispatch(Action.changeAvtRequest(idUser, response, setShowLoading));
+    changeAvtRequest: (idUser, response, setShowLoading, username) => {
+      dispatch(
+        Action.changeAvtRequest(idUser, response, setShowLoading, username)
+      );
     },
   };
 };
 
-export default connect(null, mapDispatchToProps)(ChangeAvt);
+export default connect(mapStateToProps, mapDispatchToProps)(ChangeAvt);

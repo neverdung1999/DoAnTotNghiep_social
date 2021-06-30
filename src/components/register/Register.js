@@ -117,10 +117,9 @@ function Register(props) {
 
   return (
     <div>
-      <GlobalLoading showLoading={showLoading} />
+      {showLoading && <GlobalLoading />}
       <div
         className="backgroundRegister"
-        style={openUiRegister ? null : { display: "none" }}
         style={
           openUiRegister
             ? { transform: "translateY(0%)" }

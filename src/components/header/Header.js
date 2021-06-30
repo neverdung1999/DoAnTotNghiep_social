@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import "./header.css";
 import { connect } from "react-redux";
@@ -7,15 +8,18 @@ import { useHistory } from "react-router-dom";
 import logo from "../../uploads/img/logo.png";
 import * as Actions from "../../redux/actions/Index";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
+import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Header(props) {
   const { logoutUser } = props;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
   const history = useHistory();
-  const username = cookies?.get("username");
   const dataCookies = cookies?.get("data");
+  const username = cookies?.get("username");
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [isOpenHeader, setIsOpenHeader] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
 
   const items = [
     {
@@ -47,38 +51,25 @@ function Header(props) {
       setIsOpenHeader(false);
       history.push("/login");
     }
-  }, [cookies.get("user")]);
+  }, [cookies, history]);
 
   const openFormDropDown = () => {
     setIsOpenForm(!isOpenForm);
   };
 
   const signOut = () => {
+    props.logOutRequest(cookies?.get("user"));
     logoutUser();
-  };
+    };
 
-  const handleOnSearch = (string, results) => {
-    // onSearch will have as the first callback parameter
-    // the string searched and for the second the results.
-    console.log(string, results);
-  };
-
-  const handleOnHover = (result) => {
-    // the item hovered
-    console.log(result);
-  };
-
-  const handleOnSelect = (item) => {
-    // the item selected
-    console.log(item);
-  };
-
-  const handleOnFocus = () => {
-    console.log("Focused");
+  const handleChangeUser = () => {
+    setShowLoading(true);
+    props.personalRequest(setShowLoading, username);
   };
 
   return (
     <div>
+      {showLoading && <GlobalLoading />}
       <div
         className="header"
         style={isOpenHeader ? { display: "block" } : { display: "none" }}
@@ -86,7 +77,7 @@ function Header(props) {
         <div className="container">
           <div className="logo">
             <Link to="/">
-              <img src={logo} id="logo" alt="" />
+              <img src={logo} id="logo" alt=""  />
             </Link>
           </div>
           <div className="search-nav">
@@ -94,10 +85,10 @@ function Header(props) {
             <div className="search_nav-wrapper">
               <ReactSearchAutocomplete
                 items={items}
-                onSearch={handleOnSearch}
-                onHover={handleOnHover}
-                onSelect={handleOnSelect}
-                onFocus={handleOnFocus}
+                // onSearch={handleOnSearch}
+                // onHover={handleOnHover}
+                // onSelect={handleOnSelect}
+                // onFocus={handleOnFocus}
                 autoFocus
                 styling={{
                   height: "34px",
@@ -159,9 +150,10 @@ function Header(props) {
                       state: dataCookies,
                     }}
                     id="content-dropdown"
+                    onClick={() => handleChangeUser()}
                   >
-                    <i className="far fa-user-circle" id="icon-avt"></i>Trang cá
-                    nhân
+                    <i className="far fa-user-circle" id="icon-avt"></i>
+                    Trang cá nhân
                   </Link>
                   <a href="#" id="content-dropdown">
                     <i className="far fa-calendar" id="icon-avt"></i>Đã lưu
@@ -193,6 +185,12 @@ const mapDispatchToProps = (dispatch) => {
   return {
     logoutUser: () => {
       dispatch(Actions.logoutUser());
+    },
+    personalRequest: (setShowLoading, username) => {
+      dispatch(Actions.personalRequest(setShowLoading, username));
+    },
+    logOutRequest: (id) => {
+      dispatch(Actions.logOutRequest(id));
     },
   };
 };

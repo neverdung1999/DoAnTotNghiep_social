@@ -1,14 +1,10 @@
 import React from "react";
 import "./globalLoading.css";
-import Loading from "../../../uploads/animation/loadingGlobal.gif";
 
 function GlobalLoading(props) {
-  const { showLoading } = props;
-
   return (
     <div
       className="backGroundGlobalLoading"
-      style={showLoading ? { display: "block" } : { display: "none" }}
     >
       <div className="_preloader" id="_preloader_loading">
         <div className="_item _item-1"></div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./chat.css";
 import _ from "lodash";
 import { connect } from "react-redux";
@@ -6,47 +6,152 @@ import Cookies from "universal-cookie";
 import { db } from "../../services/firebase";
 import ScrollToBottom from "react-scroll-to-bottom";
 import * as actions from "../../redux/actions/Index";
+import UiGroupChat from "../uiGroupChat/UiGroupChat";
+import UiEditChat from "../uiEditChat/UiEditChat";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 let arrImg = [];
 
 function Chat(props) {
-  const { history } = props;
+  const { history, personalRequest } = props;
+  const arrTemp = useRef([]);
   const cookies = new Cookies();
   const [chat, setChat] = useState([]);
   const idUser = cookies.get("user");
   const dataCookies = cookies.get("data");
+  const [roomId, setRoomId] = useState("");
   const username = cookies.get("username");
   const [content, setContent] = useState("");
+  const [isRender, setIsRender] = useState(true);
   const [imgChoose, setImgChoose] = useState(null);
   const [dataFriend, setDataFriend] = useState([]);
   const [showLoading, setShowLoading] = useState(true);
   const [colorChoose, setColorChoose] = useState(null);
+  const [arrContainId, setArrContainId] = useState([]);
+  const [dataHistory, setDataHistory] = useState(null);
+  const [colorHistory, setColorHistory] = useState(null);
+  const [openGroupChat, setOpenGroupChat] = useState(false);
   const [dataUserChoose, setDataUserChoose] = useState(null);
-
-  console.log(chat);
+  const [isOpenEditChat, setIsOpenEditChat] = useState(false);
+  const arrFriendNews = useRef([]);
 
   useEffect(() => {
+    let roomIdTemp = "";
+
+    //------------------------- PUSH DATA FROM HISTORY -------------------------
+
     const stateHistory = history?.location?.state;
-    stateHistory && setDataUserChoose(stateHistory);
+    if (stateHistory !== undefined) {
+      dataHistory !== "" && setDataHistory(stateHistory);
+      colorHistory !== "" && setColorHistory(stateHistory.id);
+      dataHistory && setDataUserChoose(dataHistory);
+      colorHistory && setColorChoose(colorHistory);
+    }
+
+    //------------------------- END PUSH DATA FROM HISTORY -------------------------
+
+    //------------------------- CREATE CONTENTID -------------------------
+
+    let objectTemp1 = {
+      name: dataCookies?.name,
+      imageSrc: dataCookies?.imageSrc,
+      id: dataCookies?.id,
+      username: dataCookies?.username,
+    };
+    let objectTemp2 = {
+      name: dataUserChoose?.name,
+      imageSrc: dataUserChoose?.imageSrc,
+      id: dataUserChoose?.id,
+      username: dataUserChoose?.username,
+    };
+    let objectTemp3 = {};
+    objectTemp3[idUser] = objectTemp1;
+    objectTemp3[dataUserChoose?.id] = objectTemp2;
+    setArrContainId(objectTemp3);
+
+    //------------------------- END CREATE CONTENTID -------------------------
+
+    const arrConcat = arrTemp?.current.concat(stateHistory);
+    stateHistory ? setDataFriend(arrConcat) : setDataFriend(arrTemp?.current);
+
     try {
-      props.personalRequest(setShowLoading, username);
-      const dataAssign = Object.assign(
-        dataCookies?.following,
-        dataCookies.followers
-      );
-      setDataFriend(_.uniqWith(dataAssign, _.isEqual));
-      db.ref("chats").on("value", (snapshot) => {
-        let chats = [];
-        snapshot.forEach((snap) => {
-          chats.push(snap.val());
+      let arrTemp = [];
+
+      isRender && personalRequest(setShowLoading, username);
+      setIsRender(false);
+
+      db.ref()
+        .child("chat_info")
+        .orderByChild(`containId/${idUser}/id`)
+        .equalTo(idUser)
+        .on(`value`, (snapshot) => {
+
+          snapshot.forEach((snap) => {
+            if (_.size(snap.val().containId) === 2) {
+              for (const [key, value] of Object.entries(snap.val().containId)) {
+                if (value?.id !== idUser) {
+                  //lay danh sach user de hien thi
+                  arrTemp.push(value);
+
+                  //check xem co stateHistory hay khong
+                  if (stateHistory !== undefined) {
+                    if (stateHistory?.id !== value?.id) {
+                      arrTemp.push(stateHistory);
+                    }
+                  }
+
+                  if (dataUserChoose !== null) {
+                    if (dataUserChoose?.id === value?.id) {
+                      roomIdTemp = snap.val().idRoom;
+                      setRoomId(roomIdTemp);
+                    }
+                  }
+                }
+                setDataFriend(_.uniqWith(arrTemp, _.isEqual));
+              }
+            } else {
+              arrTemp.push(snap.val());
+              setDataFriend(_.uniqWith(arrTemp, _.isEqual));
+              if (dataUserChoose !== null) {
+                if (dataUserChoose.idRoom === snap.val().idRoom) {
+                  roomIdTemp = snap.val().idRoom;
+                  setRoomId(roomIdTemp);
+                }
+              }
+            }
+          });
+          if (roomIdTemp !== "") {
+            db.ref("chat_messages/" + roomIdTemp).on("value", (snapshot) => {
+              const chatTemp = [];
+              if (snapshot.val() !== null)
+                for (const [key, value] of Object.entries(snapshot.val())) {
+                  chatTemp.push(value);
+                }
+              setChat(chatTemp);
+            });
+          } else {
+            setChat([]);
+            setRoomId("");
+          }
         });
-        setChat({ chats });
-      });
     } catch (error) {
       console.log(error);
     }
-  }, [imgChoose]);
+  }, [
+    colorHistory,
+    dataHistory,
+    dataUserChoose,
+    history?.location?.state,
+    idUser,
+    isRender,
+    personalRequest,
+    username,
+    dataCookies?.id,
+    dataCookies?.imageSrc,
+    dataCookies?.name,
+    dataCookies?.username,
+    arrFriendNews,
+  ]);
 
   const handleChangeImg = (e) => {
     const value = e.target.files;
@@ -59,7 +164,6 @@ function Chat(props) {
       callApiImage(value[0]);
     }
   };
-
 
   const callApiImage = (value) => {
     const formData = new FormData();
@@ -89,32 +193,73 @@ function Chat(props) {
   const onEnterPress = (e) => {
     if (e.keyCode === 13 && e.shiftKey === false) {
       e.preventDefault();
-      handleSubmit(e);
+      content !== "" && handleSubmit(e);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      content !== "" &&
-        (await db.ref("chats").push({
-          idUser: idUser,
-          idOthers: dataUserChoose.id_account,
-          content: content,
-          image: imgChoose,
-          timestamp: Date.now(),
-        }));
-      setContent("");
-      setImgChoose(null);
-      arrImg = [];
+      if (roomId !== "") {
+        content !== "" &&
+          (await db.ref(`chat_messages/${roomId}`).push({
+            content: content,
+            idUser: dataCookies?.id,
+            name: dataCookies?.name,
+            image: imgChoose,
+            username: dataCookies?.username,
+            imageSender: dataCookies?.imageSrc,
+            time: Date.now(),
+          }));
+        content !== "" &&
+          (await db.ref(`chat_info/${roomId}`).set({
+            containId: arrContainId,
+            idRoom: roomId,
+            imageSrc: "",
+            name: "",
+            username: "",
+            lastTime: Date.now(),
+          }));
+      } else {
+        const getKey =
+          content !== "" && (await db.ref("chat_info").push()).getKey();
+        content !== "" &&
+          (await db.ref(`chat_info/${getKey}`).set({
+            containId: arrContainId,
+            idRoom: getKey,
+            imageSrc: "",
+            name: "",
+            username: "",
+            lastTime: Date.now(),
+          }));
+
+        content !== "" &&
+          (await db.ref(`chat_messages/${getKey}`).push({
+            content: content,
+            idUser: dataCookies?.id,
+            name: dataCookies?.name,
+            username: dataCookies?.username,
+            image: imgChoose,
+            imageSender: dataCookies?.imageSrc,
+            time: Date.now(),
+          }));
+      }
+      if (content !== "") {
+        setContent("");
+        setImgChoose(null);
+        arrImg = [];
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleClickUser = (item, index) => {
+  const handleClickUser = (item) => {
     setDataUserChoose(item);
-    setColorChoose(item.id_account);
+    setColorChoose(item.id);
+    setDataHistory("");
+    setColorHistory("");
   };
 
   const onCloseShowImg = () => {
@@ -122,9 +267,32 @@ function Chat(props) {
     arrImg = [];
   };
 
+  const onOpenCreateChat = () => {
+    setOpenGroupChat(true);
+  };
+
+  const onCloseForm = (e) => {
+    setOpenGroupChat(e);
+    setIsOpenEditChat(e);
+  };
+
+  const handleEditChat = () => {
+    setIsOpenEditChat(true);
+  };
+
+  const arrDataItemChoose = async (e) => {
+    console.log(e);
+  };
+
   return (
     <div>
-      <GlobalLoading showLoading={showLoading} />
+      {showLoading && <GlobalLoading />}
+      <UiGroupChat
+        openGroupChat={openGroupChat}
+        onCloseForm={onCloseForm}
+        arrDataItemChoose={arrDataItemChoose}
+      />
+      <UiEditChat isOpenEditChat={isOpenEditChat} onCloseForm={onCloseForm} />
       <div className="contentChat">
         <div className="container-contentChat">
           <div className="contentChat-left">
@@ -132,16 +300,21 @@ function Chat(props) {
               <div className="contentChat-top-name">
                 <p id="p-contentChat-top-name">{username}</p>
               </div>
+              <i
+                className="far fa-comments"
+                id="iconcontentChatTopLeft"
+                onClick={() => onOpenCreateChat()}
+              ></i>
             </div>
             <div className="contentChat-bottom-left">
-              {dataFriend.map((item, index) => {
+              {_.uniqWith(dataFriend, _.isEqual)?.map((item, index) => {
                 return (
                   <div
                     className="item-leftChat"
                     key={index}
-                    onClick={() => handleClickUser(item, index)}
+                    onClick={() => handleClickUser(item)}
                     style={
-                      colorChoose === item.id_account
+                      colorChoose === item?.id
                         ? { backgroundColor: "#efefef" }
                         : null
                     }
@@ -150,7 +323,9 @@ function Chat(props) {
                       <img src={item?.imageSrc} alt="" id="img-chat" />
                     </div>
                     <div className="item-leftChat-right">
-                      <p id="p-item-leftChat-right">{item?.username}</p>
+                      <div className="p-item-leftChat-right">
+                        <p id="p-item-leftChat-right">{item?.username}</p>
+                      </div>
                       <span id="span-item-leftChat-right">{item?.name}</span>
                     </div>
                   </div>
@@ -161,7 +336,8 @@ function Chat(props) {
 
           {/* ----------------------------------------- CONTENT RIGHT -----------------------------------------  */}
 
-          {dataUserChoose && dataFriend.length !== 0 ? (
+          {(dataUserChoose && dataFriend.length !== 0) ||
+          (dataHistory && dataFriend.length !== 0) ? (
             <div className="contentChat-right">
               <div className="contentChat_right-top">
                 <div className="rightChat_top-left">
@@ -185,6 +361,7 @@ function Chat(props) {
                   <i
                     className="fas fa-info-circle"
                     id="rightChat_top-right"
+                    onClick={() => handleEditChat()}
                   ></i>
                 </div>
               </div>
@@ -196,58 +373,72 @@ function Chat(props) {
                       : "rightChat_bottom-top"
                   }
                 >
-                  {chat?.chats?.map((item, index) => {
+                  {chat?.map((item, index) => {
                     return (
                       <div key={index}>
-                        {(dataUserChoose.id
-                          ? dataUserChoose.id
-                          : dataUserChoose.id_account) === item?.idUser &&
-                          idUser === item?.idOthers && (
-                            <div className="content-message-left">
-                              <div className="p-content">
-                                <p id="p-content">{item.content}</p>
+                        {item?.idUser !== idUser && item?.content !== "" && (
+                          <div className="content-message-left">
+                            <div className="content-wrapper">
+                              <div className="avt-content">
+                                <img
+                                  src={item?.imageSender}
+                                  id="avt-content"
+                                  alt=""
+                                />
                               </div>
-
-                              {item?.image?.map((value, index) => {
-                                return (
-                                  <div className="img_content-left" key={index}>
-                                    <img
-                                      src={value}
-                                      alt=""
-                                      id="img_content-left"
-                                    />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                        {idUser === item?.idUser &&
-                          (dataUserChoose.id
-                            ? dataUserChoose.id
-                            : dataUserChoose.id_account) === item.idOthers && (
-                            <div>
-                              <div className="wrapper_content">
-                                <div className="p-content">
-                                  <p id="p-content">{item.content}</p>
+                              <div className="content-wrapperLeft">
+                                <div className="username-content">
+                                  {item?.name}
                                 </div>
+                                <div className="p-content">{item?.content}</div>
                               </div>
-                              {item?.image?.map((value, index) => {
-                                return (
-                                  <div
-                                    key={index}
-                                    className="img_content-right"
-                                  >
+                            </div>
+
+                            {item?.image?.map((value, index) => {
+                              return (
+                                <div className="img_content-left" key={index}>
+                                  <div className="avt-content">
                                     <img
-                                      src={value}
+                                      src={item?.imageSender}
+                                      id="avt-content"
                                       alt=""
-                                      id="img_content-right"
                                     />
                                   </div>
-                                );
-                              })}
+                                  <div className="image_Content-wrapper">
+                                    <div className="username-content">
+                                      {item?.name}
+                                    </div>
+                                    <div className="img_content_left">
+                                      <img
+                                        src={value}
+                                        alt=""
+                                        id="img_content-left"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {item?.idUser === idUser && item?.content !== "" && (
+                          <div>
+                            <div className="wrapper_content">
+                              <div className="p-content">{item?.content}</div>
                             </div>
-                          )}
+                            {item?.image?.map((value, index) => {
+                              return (
+                                <div key={index} className="img_content-right">
+                                  <img
+                                    src={value}
+                                    alt=""
+                                    id="img_content-right"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -338,6 +529,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     personalRequest: (setShowLoading, username) => {
       dispatch(actions.personalRequest(setShowLoading, username));
+    },
+    personalRequestById: (setShowLoading, id) => {
+      dispatch(actions.personalRequestById(setShowLoading, id));
     },
   };
 };

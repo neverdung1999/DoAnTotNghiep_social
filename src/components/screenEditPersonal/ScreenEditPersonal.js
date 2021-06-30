@@ -51,7 +51,7 @@ function ScreenEditPersonal(props) {
 
   return (
     <div>
-      <GlobalLoading showLoading={showLoading} />
+      {showLoading && <GlobalLoading />}
       <div className="backgroundEditPersonal_all">
         <div className="form_right-avt">
           <div className="right_avt-top">
