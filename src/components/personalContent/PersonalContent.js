@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from "react";
 import "./personalContent.css";
+import { pure } from "recompose";
 import { connect } from "react-redux";
-import Cookies from "universal-cookie";
 import DetailsPost from "../detailsPost/DetailsPost";
 import * as actions from "../../redux/actions/Index";
-import { LinearProgress } from "diginet-core-ui/components";
+import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function PersonalContent(props) {
-  const { dataPost, idDataUserApi } = props;
-  const cookies = new Cookies();
-  const idCookies = cookies.get("user");
-  const [isRender, setIsRender] = useState(true);
+  const { dataPost, idDataUserApi, getPostRequestById } = props;
   const [showLoading, setShowLoading] = useState(true);
-  const [dataNewsPost, setDataNewsPost] = useState(null);
   const [openDetailsPost, setOpenDetailsPost] = useState(false);
   const [dataDetailsPost, setDataDetailsPost] = useState(null);
 
   useEffect(() => {
+    setShowLoading(true);
     if (idDataUserApi !== undefined) {
-      isRender && props.getPostRequestById(setShowLoading, idDataUserApi);
-      setIsRender(false);
+      getPostRequestById(setShowLoading, idDataUserApi);
     }
-    setDataNewsPost(dataPost.reverse());
-  }, [dataPost, props, isRender, idCookies, idDataUserApi]);
+  }, [getPostRequestById, idDataUserApi]);
+
+  console.log(dataDetailsPost);
 
   const handleChoosePost = (data) => {
     setOpenDetailsPost(true);
@@ -41,19 +38,9 @@ function PersonalContent(props) {
           onCloseForm={onCloseForm}
         />
       )}
-      {showLoading && (
-        <LinearProgress
-          color="#d82b7d"
-          duration={1}
-          height={3}
-          percent={75}
-          showValue
-          valuePosition="top"
-          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
-        />
-      )}
+      {showLoading && <GlobalLoading  />}
       <div className="bodyContainer_bottom">
-        {dataNewsPost?.map((item, index) => {
+        {dataPost?.map((item, index) => {
           return (
             <div key={index}>
               <div className="bodyContainer_bottom-item">
@@ -74,7 +61,7 @@ function PersonalContent(props) {
 
 const mapStateToProps = (state) => {
   return {
-    dataPost: state.Post,
+    dataPost: state.PostById,
   };
 };
 
@@ -86,4 +73,6 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(PersonalContent);
+export default pure(
+  connect(mapStateToProps, mapDispatchToProps)(PersonalContent)
+);

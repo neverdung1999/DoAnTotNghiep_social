@@ -2,9 +2,9 @@ import * as Types from "../constants/ActionTypes";
 
 let initialState = [];
 
-const DetailsPost = (state = initialState, action) => {
+const PostById = (state = initialState, action) => {
   switch (action.type) {
-    case Types.GET_DETAILS_POST_INDEX:
+    case Types.GET_POST_BY_ID:
       const data = action.data;
       state = data;
       return state;
@@ -13,4 +13,4 @@ const DetailsPost = (state = initialState, action) => {
   }
 };
 
-export default DetailsPost;
+export default PostById;

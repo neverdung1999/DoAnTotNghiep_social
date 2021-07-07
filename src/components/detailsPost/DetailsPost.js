@@ -1,3 +1,5 @@
+/* eslint-disable no-loop-func */
+/* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import _ from "lodash";
@@ -9,14 +11,16 @@ import { Slide } from "react-slideshow-image";
 import "react-slideshow-image/dist/styles.css";
 import ReactHtmlParser from "react-html-parser";
 import * as actions from "../../redux/actions/Index";
-import { CircularProgress } from "diginet-core-ui/components";
-import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 import UiUpdatePost from "../uiUpdatePost/UiUpdatePost";
+import { CircularProgress } from "diginet-core-ui/components";
+import CardLoading from "../animation/cardLoading/CardLoading";
+import { db } from "../../services/firebase";
 
 function DetailsPost(props) {
   const { dataDetailsPost, getDetailPost } = props;
   const cookies = new Cookies();
   const idCookies = cookies.get("user");
+  const [likePost, setLikePost] = useState([]);
   const [isRender, setIsRender] = useState(true);
   const [showLoading, setShowLoading] = useState(true);
   const [contentMessage, setContentMessage] = useState("");
@@ -28,22 +32,103 @@ function DetailsPost(props) {
     idComment: "",
     username: "",
   });
+  const [contentChat, setContentChat] = useState([]);
+  const [contentReplyChat, setContentReplyChat] = useState([]);
+  const [countLike, setCountLike] = useState([]);
 
   useEffect(() => {
     const idPost = dataDetailsPost?.id_post;
-    isRender && props.getPostRequestByIdPost(setShowLoading, idPost);
+    isRender &&
+      props.getPostRequestByIdPost(
+        setShowLoading,
+        idPost,
+        setShowLoadingComment
+      );
     setIsRender(false);
-    setDataDetailsPost(getDetailPost[0]);
-  }, [
-    isRender,
-    dataDetailsPost?.id_account,
-    idCookies,
-    props,
-    dataDetailsPost?.id_post,
-    getDetailPost,
-  ]);
 
-  console.log(getDetailPost[0]);
+    setDataDetailsPost(getDetailPost[0]);
+    let arrTemp = [];
+    if (dataDetailsPost?.likes) {
+      for (const [key] of Object.entries(dataDetailsPost?.likes)) {
+        if (key === idCookies) {
+          arrTemp.push(dataDetailsPost?.id_post);
+        }
+      }
+      setLikePost(_.uniqWith(arrTemp, _.isEqual));
+    }
+
+      try {
+        const ref = db.ref("/social_network");
+        const usersRef = ref.child("users");
+        const postsRef = ref.child("posts");
+
+        const getUser = async (id) => {
+          let data = {};
+          if (id === undefined) return data;
+          await usersRef.child(id).once("value", (snap) => {
+            if (snap.val() !== null) {
+              const { username, imageSrc } = snap.val();
+              data = { username, accountImage: imageSrc };
+            }
+          });
+          return data;
+        };
+
+        const fetchDataCommentTest = async (idPost, idKey) => {
+          let data = {};
+          if (idPost === undefined || idKey === undefined) return data;
+          await postsRef
+            .child(`${idPost}/comments`)
+            .child(idKey)
+            .once("value", (snap) => {
+              data = { id_comment: snap.key };
+            });
+          return data;
+        };
+
+        const fetchDataComment = async () => {
+          let data = {};
+          let dataReply = {};
+          await postsRef.child(`${idPost}`).on("value", async (snap) => {
+            const arrTemp = [];
+            const arrReplyTemp = [];
+            const arrLikesTemp = [];
+
+            if (snap.val()?.likes)
+              for (const [key] of Object.entries(snap.val()?.likes)) {
+                arrLikesTemp.push(key);
+              }
+
+            if (snap.val()?.comments)
+              for (const [key, value] of Object.entries(snap.val()?.comments)) {
+                const testnhaaa = await fetchDataCommentTest(idPost, key);
+                let dataUser = await getUser(value?.id_account);
+                data = await { ...value, ...dataUser, ...testnhaaa };
+                arrTemp.push(data);
+
+                if (data?.reply) {
+                  for (const [key, value] of Object.entries(data?.reply)) {
+                    let dataUserReply = await getUser(value?.id_account);
+                    dataReply = await {
+                      ...value,
+                      ...dataUserReply,
+                      ...testnhaaa,
+                    };
+                    arrReplyTemp.push(dataReply);
+                  }
+                }
+              }
+            setCountLike(arrLikesTemp);
+            setContentChat(arrTemp);
+            setContentReplyChat(arrReplyTemp);
+          });
+        };
+
+        fetchDataComment();
+      } catch (error) {
+        console.log(error);
+      }
+  }, [isRender, dataDetailsPost, idCookies, props, getDetailPost]);
 
   const onCloseFrom = () => {
     props.onCloseForm();
@@ -87,9 +172,9 @@ function DetailsPost(props) {
           dataDetailsPost?.id_account,
           idCookies,
           contentMessage,
-          ["testTruoc"],
-          setShowLoading,
-          setShowLoadingComment
+          [dataDetailsPost?.id_account],
+          setShowLoadingComment,
+          "detailsPost"
         )
       : props.commentReplyPostRequest(
           //reply comment
@@ -99,7 +184,6 @@ function DetailsPost(props) {
           idCookies,
           `@<a href="personal/${dataUserReply?.username}">${dataUserReply?.username}</a> ${contentMessage}`,
           [dataUserReply?.id],
-          setShowLoading,
           setShowLoadingComment
         );
     setContentMessage("");
@@ -110,9 +194,25 @@ function DetailsPost(props) {
     });
   };
 
+  const handleLikePost = () => {
+    let removeItem = [];
+    removeItem = [...likePost, dataDetailsPost?.id_post];
+
+    if (likePost.includes(dataDetailsPost?.id_post)) {
+      removeItem = likePost.filter((e) => e !== dataDetailsPost?.id_post);
+    }
+    setLikePost(removeItem);
+    if (dataDetailsPost) {
+      props.likePostRequest(
+        dataDetailsPost?.id_post,
+        dataDetailsPost?.id_account,
+        idCookies
+      );
+    }
+  };
+
   return (
     <div>
-      {showLoading && <GlobalLoading />}
       {openUiUpdatePost && (
         <UiUpdatePost
           onCloseForm={onCloseForm}
@@ -125,269 +225,308 @@ function DetailsPost(props) {
           id="iconClosePost"
           onClick={() => onCloseFrom()}
         ></i>
-        <div className="backgroundPost_form">
-          <div className="backgroundPost_form-left">
-            <Slide
-              autoplay={false}
-              style={{ width: "100%", height: "100%" }}
-              transitionDuration={300}
-              arrows={dataDetailPost?.imageSrc?.lenght === 1 ? false : true}
-            >
-              {dataDetailPost?.imageSrc?.map((item, index) => {
-                return (
-                  <img
-                    key={index}
-                    src={item}
-                    alt=""
-                    id="backgroundPost_form-left"
-                  />
-                );
-              })}
-            </Slide>
-          </div>
-          <div className="backgroundPost_form-right">
-            <div className="form_right-top">
-              <div className="right_top-avt">
-                <img
-                  src={dataDetailPost?.accountImage}
-                  alt=""
-                  id="right_top-avt"
-                />
-              </div>
-              <div className="right_top-title">{dataDetailPost?.username}</div>
-              {dataDetailPost?.id_account === idCookies && (
-                <div className="right_top-function">
-                  <i
-                    className="fas fa-ellipsis-v"
-                    id="right_top-function"
-                    onClick={() => handleOpenFormUpdate()}
-                  ></i>
-                </div>
-              )}
+        {showLoading && <CardLoading actionTypes="detailsPost" />}
+        {!showLoading && (
+          <div className="backgroundPost_form">
+            <div className="backgroundPost_form-left">
+              <Slide
+                autoplay={false}
+                style={{ width: "100%", height: "100%" }}
+                transitionDuration={300}
+                arrows={dataDetailPost?.imageSrc?.lenght === 1 ? false : true}
+              >
+                {dataDetailPost?.imageSrc?.map((item, index) => {
+                  return (
+                    <img
+                      key={index}
+                      src={item}
+                      alt=""
+                      id="backgroundPost_form-left"
+                    />
+                  );
+                })}
+              </Slide>
             </div>
-            <div
-              className={
-                dataUserReply.id !== ""
-                  ? "form_right-body-reply"
-                  : "form_right-body"
-              }
-            >
-              <div className="right_body-item">
-                <div className="body_item-left">
+            <div className="backgroundPost_form-right">
+              <div className="form_right-top">
+                <div className="right_top-avt">
                   <img
                     src={dataDetailPost?.accountImage}
                     alt=""
-                    id="body_item-left"
+                    id="right_top-avt"
                   />
                 </div>
-                <div className="body_item-right">
-                  <div className="item_right-name">
-                    <a href="#" id="right_name-a">
-                      {dataDetailPost?.username}
-                    </a>
-                    <p id="right_name-p">{dataDetailPost?.content}</p>
-                    <span id="right_name-span">
-                      {" "}
-                      {TimeStamp(dataDetailPost?.timestamp)}{" "}
-                    </span>
-                  </div>
+                <div className="right_top-title">
+                  {dataDetailPost?.username}
                 </div>
-              </div>
-              {dataDetailPost?.comments?.map((content, index) => {
-                return (
-                  <div className="right_body-comment" key={index}>
-                    <div className="body_comment-user">
-                      <div className="comment_user-left">
-                        <img
-                          src={content?.accountImage}
-                          alt=""
-                          id="user_left-img"
-                        />
-                      </div>
-                      <div className="comment_user-right">
-                        <div className="user_right-comment">
-                          <div className="right_comment-top">
-                            <a href="#" id="user_right-a">
-                              {content?.username}
-                            </a>
-                            <p id="user_right-p">
-                              {ReactHtmlParser(content?.content)}
-                            </p>
-                          </div>
-                          <div className="right_comment-bottom">
-                            <p id="comment_bottom-time">
-                              {TimeStamp(content?.timestamp)}
-                            </p>
-                            <span id="comment_bottom-heart">1 lượt thích</span>
-                            <span
-                              id="comment_bottom-reply"
-                              onClick={() => handleReplyComment(content)}
-                            >
-                              Trả lời
-                            </span>
-                          </div>
-                        </div>
-                        <div className="user_right-heart">
-                          <i className="far fa-heart" id="right_heart-icon"></i>
-                        </div>
-                      </div>
-                    </div>
-                    {content?.reply && (
-                      <div className="reply_comment">
-                        <div className="reply_comment-left"></div>
-                        <div className="reply_comment-right">
-                          {/* <a href="#" id="comment_right-a">
-                            ---- Xem câu trả lời
-                          </a> */}
-                          {content?.reply &&
-                            content?.reply?.map((item, index) => {
-                              return (
-                                <div key={index} style={{ marginTop: "15px" }}>
-                                  <div className="comment_right-all">
-                                    <div className="right_all-left">
-                                      <img
-                                        src={item?.accountImage}
-                                        alt=""
-                                        id="all_left-img"
-                                      />
-                                    </div>
-                                    <div className="right_all-right">
-                                      <div className="all_right-comment">
-                                        <p id="all_right-content">
-                                          <b>{item?.username}</b>
-                                          <br />
-                                          {ReactHtmlParser(item?.content)}
-                                        </p>
-                                      </div>
-                                      <div className="all_right-heart">
-                                        <i
-                                          className="far fa-heart"
-                                          id="right_heart-icon"
-                                        ></i>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div
-                                    className="right_comment-bottom-reply"
-                                    style={{ marginLeft: 43 }}
-                                  >
-                                    <p id="comment_bottom-time">
-                                      {" "}
-                                      {TimeStamp(item?.timestamp)}
-                                    </p>
-                                    <span id="comment_bottom-heart">
-                                      1 lượt thích
-                                    </span>
-                                    <span
-                                      id="comment_bottom-reply"
-                                      onClick={() =>
-                                        handleReplyComment(item, content?.id)
-                                      }
-                                    >
-                                      Trả lời
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    )}
+                {dataDetailPost?.id_account === idCookies && (
+                  <div className="right_top-function">
+                    <i
+                      className="fas fa-ellipsis-v"
+                      id="right_top-function"
+                      onClick={() => handleOpenFormUpdate()}
+                    ></i>
                   </div>
-                );
-              })}
-            </div>
-            <div
-              className={
-                dataUserReply.id !== ""
-                  ? "form_right-bottom-reply"
-                  : "form_right-bottom"
-              }
-            >
+                )}
+              </div>
               <div
-                className="right_bottom-top"
-                style={
+                className={
                   dataUserReply.id !== ""
-                    ? { height: "50%" }
-                    : { height: " 70%" }
+                    ? "form_right-body-reply"
+                    : "form_right-body"
                 }
               >
-                <div className="bottom_top-top">
-                  <div className="top_top-itemLeft">
-                    <i className="far fa-heart" id="top_top-item"></i>
-                    <i className="far fa-comment" id="top_top-item"></i>
-                    <i className="far fa-paper-plane" id="top_top-item"></i>
-                  </div>
-                  <div className="top_top-itemRight">
-                    <i className="far fa-calendar-check" id="top_top-item"></i>
-                  </div>
-                </div>
-                <div className="bottom_top-body">
-                  <p id="top_body-heart">
-                    {_.size(dataDetailPost?.likes)} lượt thích
-                  </p>
-                </div>
-                <div className="bottom_top-bottom">
-                  <p id="top_body-time">
-                    {TimeStamp(dataDetailPost?.timestamp)}
-                  </p>
-                </div>
-              </div>
-              {dataUserReply.id !== "" ? (
-                <div className="bottom_bottom-showUser">
-                  <i
-                    className="fas fa-times"
-                    id="bottom_showUser-close"
-                    onClick={() => onCloseFormReply()}
-                  ></i>
-                  Đang trả lời: <b>{dataUserReply?.username}</b>
-                </div>
-              ) : (
-                <div></div>
-              )}
-
-              <div
-                className="right_bottom-bottom"
-                style={dataUserReply ? { height: "25%" } : { height: "30%" }}
-              >
-                <div className="bottom_bottom-left">
-                  {showLoadingComment && (
-                    <CircularProgress
-                      color="#f26e41"
-                      direction="bottom"
-                      percent={100}
-                      percentColor="#0095ff"
-                      size="extraSmall"
-                      strokeWidth={10}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        fontSize: 10,
-                        zIndex: 10000,
-                      }}
+                <div className="right_body-item">
+                  <div className="body_item-left">
+                    <img
+                      src={dataDetailPost?.accountImage}
+                      alt=""
+                      id="body_item-left"
                     />
-                  )}
-                  <textarea
-                    name=""
-                    cols="30"
-                    rows="10"
-                    id="bottom_left-input"
-                    placeholder="Nhập bình luận..."
-                    onChange={(e) => handleChange(e)}
-                    value={contentMessage}
-                  ></textarea>
+                  </div>
+                  <div className="body_item-right">
+                    <div className="item_right-name">
+                      <a href="#" id="right_name-a">
+                        {dataDetailPost?.username}
+                      </a>
+                      <p id="right_name-p">{dataDetailPost?.content}</p>
+                      <span id="right_name-span">
+                        {" "}
+                        {TimeStamp(dataDetailPost?.timestamp)}{" "}
+                      </span>
+                    </div>
+                  </div>
                 </div>
+                {contentChat?.map((content, index) => {
+                  return (
+                    <div className="right_body-comment" key={index}>
+                      <div className="body_comment-user">
+                        <div className="comment_user-left">
+                          <img
+                            src={content?.accountImage}
+                            alt=""
+                            id="user_left-img"
+                          />
+                        </div>
+                        <div className="comment_user-right">
+                          <div className="user_right-comment">
+                            <div className="right_comment-top">
+                              <a href="#" id="user_right-a">
+                                {content?.username}
+                              </a>
+                              <p id="user_right-p">
+                                {ReactHtmlParser(content?.content)}
+                              </p>
+                            </div>
+                            <div className="right_comment-bottom">
+                              <p id="comment_bottom-time">
+                                {TimeStamp(content?.timestamp)}
+                              </p>
+                              <span id="comment_bottom-heart">
+                                1 lượt thích
+                              </span>
+                              <span
+                                id="comment_bottom-reply"
+                                onClick={() =>
+                                  handleReplyComment(
+                                    content,
+                                    content?.id_comment
+                                  )
+                                }
+                              >
+                                Trả lời
+                              </span>
+                            </div>
+                          </div>
+                          <div className="user_right-heart">
+                            <i
+                              className="far fa-heart"
+                              id="right_heart-icon"
+                            ></i>
+                          </div>
+                        </div>
+                      </div>
+                      {contentReplyChat && (
+                        <div className="reply_comment">
+                          <div className="reply_comment-left"></div>
+                          <div className="reply_comment-right">
+                            {/* <a href="#" id="comment_right-a">
+                            ---- Xem câu trả lời
+                          </a> */}
+                            {contentReplyChat !== undefined &&
+                              Object.values(contentReplyChat).map(
+                                (item, index) => {
+                                  return (
+                                    <div key={index}>
+                                      {item?.id_comment ===
+                                        content?.id_comment && (
+                                        <div style={{ marginTop: "15px" }}>
+                                          <div className="comment_right-all">
+                                            <div className="right_all-left">
+                                              <img
+                                                src={item?.accountImage}
+                                                alt=""
+                                                id="all_left-img"
+                                              />
+                                            </div>
+                                            <div className="right_all-right">
+                                              <div className="all_right-comment">
+                                                <p id="all_right-content">
+                                                  <b>{item?.username}</b>
+                                                  <br />
+                                                  {ReactHtmlParser(
+                                                    item?.content
+                                                  )}
+                                                </p>
+                                              </div>
+                                              <div className="all_right-heart">
+                                                <i
+                                                  className="far fa-heart"
+                                                  id="right_heart-icon"
+                                                ></i>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div
+                                            className="right_comment-bottom-reply"
+                                            style={{ marginLeft: 43 }}
+                                          >
+                                            <p id="comment_bottom-time">
+                                              {" "}
+                                              {TimeStamp(item?.timestamp)}
+                                            </p>
+                                            <span id="comment_bottom-heart">
+                                              1 lượt thích
+                                            </span>
+                                            <span
+                                              id="comment_bottom-reply"
+                                              onClick={() =>
+                                                handleReplyComment(
+                                                  item,
+                                                  content?.id_comment
+                                                )
+                                              }
+                                            >
+                                              Trả lời
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div
+                className={
+                  dataUserReply.id !== ""
+                    ? "form_right-bottom-reply"
+                    : "form_right-bottom"
+                }
+              >
                 <div
-                  className="bottom_bottom-right"
-                  onClick={() => handleSubmit()}
+                  className="right_bottom-top"
+                  style={
+                    dataUserReply.id !== ""
+                      ? { height: "50%" }
+                      : { height: " 70%" }
+                  }
                 >
-                  Đăng
+                  <div className="bottom_top-top">
+                    <div className="top_top-itemLeft">
+                      <i
+                        className="far fa-heart"
+                        id="top_top-item"
+                        onClick={() => handleLikePost()}
+                        style={
+                          likePost.includes(dataDetailsPost?.id_post)
+                            ? { fontWeight: "bold", color: "rgb(237, 73, 86)" }
+                            : null
+                        }
+                      ></i>
+                      <i className="far fa-comment" id="top_top-item"></i>
+                      <i className="far fa-paper-plane" id="top_top-item"></i>
+                    </div>
+                    <div className="top_top-itemRight">
+                      <i
+                        className="far fa-calendar-check"
+                        id="top_top-item"
+                      ></i>
+                    </div>
+                  </div>
+                  <div className="bottom_top-body">
+                    <p id="top_body-heart">
+                      {_.size(countLike)} lượt thích
+                    </p>
+                  </div>
+                  <div className="bottom_top-bottom">
+                    <p id="top_body-time">
+                      {TimeStamp(dataDetailPost?.timestamp)}
+                    </p>
+                  </div>
+                </div>
+                {dataUserReply.id !== "" ? (
+                  <div className="bottom_bottom-showUser">
+                    <i
+                      className="fas fa-times"
+                      id="bottom_showUser-close"
+                      onClick={() => onCloseFormReply()}
+                    ></i>
+                    Đang trả lời: <b>{dataUserReply?.username}</b>
+                  </div>
+                ) : (
+                  <div></div>
+                )}
+
+                <div
+                  className="right_bottom-bottom"
+                  style={dataUserReply ? { height: "25%" } : { height: "30%" }}
+                >
+                  <div className="bottom_bottom-left">
+                    {showLoadingComment && (
+                      <CircularProgress
+                        color="#f26e41"
+                        direction="bottom"
+                        percent={100}
+                        percentColor="#0095ff"
+                        size="extraSmall"
+                        strokeWidth={10}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          fontSize: 10,
+                          zIndex: 10000,
+                        }}
+                      />
+                    )}
+                    <textarea
+                      name=""
+                      cols="30"
+                      rows="10"
+                      id="bottom_left-input"
+                      placeholder="Nhập bình luận..."
+                      onChange={(e) => handleChange(e)}
+                      value={contentMessage}
+                    ></textarea>
+                  </div>
+                  <div
+                    className="bottom_bottom-right"
+                    onClick={() => handleSubmit()}
+                  >
+                    Đăng
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -401,8 +540,17 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getPostRequestByIdPost: (setShowLoading, idPost) => {
-      dispatch(actions.getPostRequestByIdPost(setShowLoading, idPost));
+    getPostRequestByIdPost: (setShowLoading, idPost, setShowLoadingComment) => {
+      dispatch(
+        actions.getPostRequestByIdPost(
+          setShowLoading,
+          idPost,
+          setShowLoadingComment
+        )
+      );
+    },
+    likePostRequest: (idPost, idOwner, idCookies) => {
+      dispatch(actions.likePostRequest(idPost, idOwner, idCookies));
     },
     commentPostRequest: (
       idPost,
@@ -410,8 +558,8 @@ const mapDispatchToProps = (dispatch) => {
       idAccount,
       content,
       mentionList,
-      setShowLoading,
-      setShowLoadingComment
+      setShowLoadingComment,
+      typeComment
     ) => {
       dispatch(
         actions.commentPostRequest(
@@ -420,8 +568,8 @@ const mapDispatchToProps = (dispatch) => {
           idAccount,
           content,
           mentionList,
-          setShowLoading,
-          setShowLoadingComment
+          setShowLoadingComment,
+          typeComment
         )
       );
     },
@@ -432,7 +580,6 @@ const mapDispatchToProps = (dispatch) => {
       idAccount,
       content,
       mentionList,
-      setShowLoading,
       setShowLoadingComment
     ) => {
       dispatch(
@@ -443,7 +590,6 @@ const mapDispatchToProps = (dispatch) => {
           idAccount,
           content,
           mentionList,
-          setShowLoading,
           setShowLoadingComment
         )
       );

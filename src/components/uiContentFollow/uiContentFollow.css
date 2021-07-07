@@ -33,7 +33,7 @@
 }
 
 .backgroundContentFollow{
-    position:absolute;
+    position:fixed;
     width: 100%;
     height: 100%;
     top: 0;
@@ -115,6 +115,7 @@
 }
 
 .bottom_left-title{
+    position: relative;
     width: 75%;
     height: 100%;
     overflow: hidden;

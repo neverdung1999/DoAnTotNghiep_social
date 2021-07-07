@@ -4,6 +4,7 @@ import Personal from "./Personal";
 import MyUser from "./myUser";
 import Home from "./Home";
 import Post from "./Post";
+import PostById from "./PostById";
 import DetailsPost from "./DetailsPost";
 
 const appReducers = combineReducers({
@@ -12,6 +13,7 @@ const appReducers = combineReducers({
   MyUser,
   Home,
   Post,
+  PostById,
   DetailsPost,
 });
 

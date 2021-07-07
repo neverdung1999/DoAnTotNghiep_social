@@ -34,7 +34,6 @@ function Personal(props) {
   const [openContentFollow, setOpenContentFollow] = useState(false);
 
   useEffect(() => {
-
     if (!idUser) {
       history.push("/");
     } else {
@@ -52,6 +51,14 @@ function Personal(props) {
         }
       }
 
+      let countPost = 0;
+      dataPost?.forEach((data) => {
+        if (data?.id_account === dataUserApi?.id) {
+          countPost += 1;
+        }
+      });
+      setNumberPost(countPost);
+
       setDataUser(dataUserApi);
 
       if (!_.isEmpty(dataUserApi) && dataUserApi?.username !== username) {
@@ -68,14 +75,6 @@ function Personal(props) {
           setCheckUserFollow(-1);
         }
       }
-
-      let countPost = 0;
-      dataPost?.forEach((data) => {
-        if (data?.id_account === dataUserApi?.id) {
-          countPost += 1;
-        }
-      });
-      setNumberPost(countPost);
     }
   }, [
     dataUserApi,
@@ -134,7 +133,7 @@ function Personal(props) {
     props.followFriendRequest(
       dataUserApi.id,
       setShowLoading,
-      history.location.pathname.slice(10)
+      dataUserApi?.username
     );
   };
 
@@ -312,7 +311,7 @@ function Personal(props) {
 const mapStateToProps = (state) => {
   return {
     dataUserApi: state.Personal,
-    dataPost: state.Post,
+    dataPost: state.PostById,
   };
 };
 

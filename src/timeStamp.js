@@ -7,7 +7,7 @@ const timeStamp = (time) => {
   const resultsMin = dateNow.diff(dateParams, "minutes");
   const resultsOur = dateNow.diff(dateParams, "hours");
   const resultsDay = dateNow.diff(dateParams, "days");
-  const resultsWeeks = dateNow.diff(dateParams, "weeks");
+  const resultsDetails = dateNow.format("D [Tháng] M [lúc] HH:mm");
 
   let results = null;
   if (resultsSec <= 60) {
@@ -16,10 +16,10 @@ const timeStamp = (time) => {
     results = resultsMin + " phút trước";
   } else if (resultsOur <= 24) {
     results = resultsOur + " tiếng trước";
-  } else if (resultsDay <= 7) {
+  } else if (resultsDay <= 2) {
     results = resultsDay + " ngày trước";
   } else {
-    results = resultsWeeks + " tuần trước";
+    results = resultsDetails;
   }
   return results;
 };

@@ -58,8 +58,6 @@ function AddNews(props) {
       });
   };
 
-  
-
   const handleChangeImage = async (e) => {
     const value = e.target.files;
     if (value.length > 1) {
@@ -84,14 +82,14 @@ function AddNews(props) {
       !dataDetailPost
         ? props.postNewsRequest(
             idUser,
-            img[0],
+            img,
             content,
             setShowLoading,
             setOpenFormAddNews
           )
         : props.updatePostRequest(
             idUser,
-            img[0],
+            img,
             content,
             setShowLoading,
             setOpenFormAddNews

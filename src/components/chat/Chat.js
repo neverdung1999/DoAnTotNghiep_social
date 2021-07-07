@@ -3,11 +3,12 @@ import "./chat.css";
 import _ from "lodash";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
+import TimeStamp from "../../timeStamp";
 import { db } from "../../services/firebase";
+import UiEditChat from "../uiEditChat/UiEditChat";
 import ScrollToBottom from "react-scroll-to-bottom";
 import * as actions from "../../redux/actions/Index";
 import UiGroupChat from "../uiGroupChat/UiGroupChat";
-import UiEditChat from "../uiEditChat/UiEditChat";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 let arrImg = [];
@@ -374,6 +375,7 @@ function Chat(props) {
                   }
                 >
                   {chat?.map((item, index) => {
+                    console.log(item);
                     return (
                       <div key={index}>
                         {item?.idUser !== idUser && item?.content !== "" && (
@@ -388,7 +390,7 @@ function Chat(props) {
                               </div>
                               <div className="content-wrapperLeft">
                                 <div className="username-content">
-                                  {item?.name}
+                                  {item?.name} - {TimeStamp(item?.time)}
                                 </div>
                                 <div className="p-content">{item?.content}</div>
                               </div>

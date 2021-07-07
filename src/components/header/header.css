@@ -107,7 +107,7 @@ button{
     background-color: white;
     border-bottom: 1px solid #dbdbdb;
     border-top: 1px solid #dbdbdb;
-    z-index: 2;
+    z-index: 10;
 }
 
 .container{

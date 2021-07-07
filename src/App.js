@@ -1,13 +1,63 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import routers from "./routers";
-import Header from "./components/header/Header";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
+import { db } from "./services/firebase";
+import Header from "./components/header/Header";
 import * as actions from "./redux/actions/Index";
 import Cookies from "universal-cookie";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import NotificationToast from "./components/animation/notificationToast/NotificationToast";
 
 function App(props) {
   const cookies = new Cookies();
+  const idCookies = cookies.get("user");
+  const [idNotification, setNotification] = useState("");
+  const [arrNotiContent, setArrNotiContent] = useState([]);
+
+  useEffect(() => {
+    try {
+      const ref = db.ref("/social_network");
+      const notiRef = ref.child("notifications");
+      const userRef = ref.child("users");
+
+      const getUser = async (id) => {
+        let data;
+        if  (id === null) return data;
+        await userRef.child(id).once("value", (snap) => {
+          const {imageSrc, username} = snap.val();
+          data = {imageSrc, username};
+        });
+        return data;
+      };
+
+      const notificationRequest = async () => {
+        let data = [];
+        await notiRef.on("value", async (snapshot) => {
+          const arrNotiTemp = [];
+          const arrNotiContentTemp = [];
+          for (const [key, value] of Object.entries(snapshot.val())) {
+            if (value?.key === idCookies) {
+               setNotification(key);
+              if (value?.notification) arrNotiTemp.push(value?.notification);
+            }
+          }
+          if (arrNotiTemp[0]) {
+            for (const [key, value] of Object.entries(arrNotiTemp[0])) {
+              if (!value?.hasSeen) {
+                let dataUser = await getUser(value?.id_account)
+                data = await {...value, ...dataUser};
+                arrNotiContentTemp.push(data);
+              }
+            }
+            setArrNotiContent(arrNotiContentTemp);
+          }
+        });
+      };
+      notificationRequest();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   const showContentComponents = (routers) => {
     let results = null;
@@ -29,8 +79,16 @@ function App(props) {
   return (
     <Router>
       <Header />
+      <NotificationToast
+        data={arrNotiContent}
+        idNotification={idNotification}
+      />
       <div className="clearfix"></div>
-      <div className="container">{showContentComponents(routers)}</div>
+      <div
+        style={{ width: "100%", height: "100%", backgroundColor: "#f0f2f5" }}
+      >
+        <div className="container">{showContentComponents(routers)}</div>
+      </div>
     </Router>
   );
 }

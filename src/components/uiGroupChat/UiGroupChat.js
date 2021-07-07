@@ -3,7 +3,6 @@ import "./uiGroupChat.css";
 import Cookies from "universal-cookie";
 import _ from "lodash";
 import { db } from "../../services/firebase";
-import { Link } from "react-router-dom";
 
 function UiGroupChat(props) {
   const { openGroupChat } = props;
@@ -160,7 +159,6 @@ function UiGroupChat(props) {
                   </div>
                 );
               })}
-
               {/* ----------------------------------- end item ----------------------------------- */}
             </div>
           </div>

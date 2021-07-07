@@ -34,7 +34,7 @@ function Suggested(props) {
                 to={{ pathname: `/personal/${value?.username}`, state: value }}
                 id="name-sugges"
               >
-                <p>{value.name}</p>
+                <p>{value.username}</p>
               </Link>
             </div>
             <div className="follow-sugges">
