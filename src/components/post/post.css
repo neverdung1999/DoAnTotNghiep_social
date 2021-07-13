@@ -160,11 +160,12 @@
   width: 100%;
   height: 20px;
   color: #8e8e8e;
+  margin-top: 5px;
 }
 
 .topItem_bottom-bottom{
   width: 100%;
-  margin: 7px 0px;
+  margin: 6px 0px;
 }
 
 .topItem_bottom-bottom b {

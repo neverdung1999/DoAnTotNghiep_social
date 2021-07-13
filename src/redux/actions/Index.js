@@ -20,6 +20,7 @@ export const loginUserRequest = (
       password: valueInputPassword,
     })
       .then((res) => {
+        console.log(res);
         setShowLoading(false);
         dispatch(loginUser(res, history));
       })
@@ -368,7 +369,7 @@ export const getPostRequestByIdPost = (
         `/post/byId?postId=${idPost}`,
         null
       );
-      setShowLoading(false);
+      // setShowLoading(false);
       setShowLoadingComment && setShowLoadingComment(false);
       dispatch(getPostDetailsIndex(response?.data));
     } catch (error) {
@@ -384,10 +385,11 @@ export const getPostDetailsIndex = (data) => {
   };
 };
 
-export const getPostDetails = (data) => {
+export const getPostDetails = (data, typePost) => {
   return {
     type: Types.GET_DETAILS_POST,
     data,
+    typePost,
   };
 };
 
@@ -405,18 +407,21 @@ export const updatePostRequest = (
   img,
   content,
   setShowLoading,
-  setOpenFormAddNews
+  setOpenFormAddNews,
+  setOpenUiUpdatePost,
+  idUser
 ) => {
   return async (dispatch) => {
     try {
       const response = await CallApi("PUT", "/post", {
-        id_account: id,
+        id_post: id,
         imageSrc: img,
         content: content,
       });
-      setOpenFormAddNews(false);
+      setOpenFormAddNews && setOpenFormAddNews(false);
+      setOpenUiUpdatePost && setOpenUiUpdatePost(false);
       if (response.data === "success") {
-        dispatch(getPostRequest(setShowLoading, id));
+        dispatch(getPostRequest(setShowLoading, idUser));
       }
     } catch (error) {
       console.log(error);
@@ -434,8 +439,7 @@ export const commentPostRequest = (
   idAccount,
   content,
   mentionList,
-  setShowLoadingComment,
-  typeComment
+  setShowLoadingComment
 ) => {
   return async (dispatch) => {
     try {
@@ -446,10 +450,14 @@ export const commentPostRequest = (
         contentHtml: content,
         mentionList: mentionList,
       });
-      if (typeComment === "post") {
-        dispatch(getPostRequestByIdPostTest(idPost, setShowLoadingComment));
-      } else {
-        setShowLoadingComment && setShowLoadingComment(false);
+      if (response?.status >= 200 && response?.status < 300) {
+        dispatch(
+          getPostRequestByIdPostTest(
+            idPost,
+            setShowLoadingComment,
+            "commentPost"
+          )
+        );
       }
     } catch (error) {
       console.log(error);
@@ -476,8 +484,10 @@ export const commentReplyPostRequest = (
         contentHtml: content,
         mentionList: mentionList,
       });
-      console.log(response);
-      setShowLoadingComment && setShowLoadingComment(false);
+      response?.status >= 200 &&
+        response?.status < 300 &&
+        setShowLoadingComment &&
+        setShowLoadingComment(false);
       // dispatch(
       //   getPostRequestByIdPost(setShowLoading, idPost, setShowLoadingComment)
       // );
@@ -489,7 +499,13 @@ export const commentReplyPostRequest = (
 
 // ------------------------------------------------------ LIKE POST ------------------------------------------------------
 
-export const likePostRequest = (idPost, idOwner, idCookies) => {
+export const likePostRequest = (
+  idPost,
+  idOwner,
+  idCookies,
+  typePost,
+  setShowLoadingComment
+) => {
   return async (dispatch) => {
     try {
       const response = await CallApi("POST", "/post/like", {
@@ -497,28 +513,65 @@ export const likePostRequest = (idPost, idOwner, idCookies) => {
         id_owner: idOwner,
         id_account: idCookies,
       });
-      // dispatch(getPostRequestByIdPostTest(idPost));
+      response?.status >= 200 &&
+        response?.status < 300 &&
+        dispatch(
+          getPostRequestByIdPostTest(
+            idPost,
+            setShowLoadingComment,
+            "likePost",
+            typePost
+          )
+        );
     } catch (error) {
       console.log(error);
     }
   };
 };
 
-export const getPostRequestByIdPostTest = (idPost, setShowLoadingComment) => {
+export const getPostRequestByIdPostTest = (
+  idPost,
+  setShowLoadingComment,
+  type,
+  typePost
+) => {
   return async (dispatch) => {
     try {
-      console.log(idPost);
       const response = await CallApi(
         "GET",
         `/post/byId?postId=${idPost}`,
         null
       );
       setShowLoadingComment && setShowLoadingComment(false);
-      dispatch(getPostDetails(response?.data));
-      dispatch(getPostDetailsIndex(response?.data));
-      dispatch(getPostDetailsComment(response?.data));
+      if (type === "likePost") {
+        dispatch(getPostDetails(response?.data, typePost)); //allPost
+        dispatch(getPostDetailsIndex(response?.data)); //byIdPost
+      }
+      type === "commentPost" && dispatch(getPostDetailsComment(response?.data));
     } catch (error) {
       console.log(error);
     }
+  };
+};
+
+// ------------------------------------------------------ GET ALL USER ------------------------------------------------------
+
+export const getAllUserRequest = () => {
+  return async (dispatch) => {
+    try {
+      const response = await CallApi("GET", "/user/getAll", null);
+      response?.status >= 200 &&
+        response?.status < 300 &&
+        dispatch(getAllUser(response?.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const getAllUser = (data) => {
+  return {
+    type: Types.ALL_USER,
+    data,
   };
 };

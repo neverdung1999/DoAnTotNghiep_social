@@ -13,6 +13,7 @@ let initialState = {
     messageEmailAlready: "",
     messageEmailUsernameAlready: "",
   },
+  dataAllUser: [],
 };
 
 const authen = (state = initialState, action) => {
@@ -64,6 +65,10 @@ const authen = (state = initialState, action) => {
       cookies.remove("user");
       cookies.remove("username");
       cookies.remove("data");
+      return state;
+    case Types.ALL_USER:
+      const dataAllUser = action.data;
+      state.dataAllUser = dataAllUser;
       return state;
     default:
       return state;

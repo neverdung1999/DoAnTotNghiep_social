@@ -14,3 +14,12 @@ export const GET_POST_BY_ID = "GET_POST_BY_ID";
 export const GET_DETAILS_POST = "GET_DETAILS_POST";
 export const GET_DETAILS_POST_COMMENT = "GET_DETAILS_POST_COMMENT";
 export const GET_DETAILS_POST_INDEX = "GET_DETAILS_POST_INDEX";
+export const GET_ALL_USER = "GET_ALL_USER";
+export const ALL_USER = "ALL_USER";
+// ------------------------ APARTMENT ------------------------------
+export const GET_BILL = "GET_BILL";
+export const GET_COST = "GET_COST";
+export const GET_POST_APARTMENT = "GET_POST_APARTMENT";
+export const CREATE_PAYMENT = "CREATE_PAYMENT";
+export const PAYMENT_HISTORY = "PAYMENT_HISTORY";
+

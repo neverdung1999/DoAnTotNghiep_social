@@ -10,6 +10,7 @@ import ScrollToBottom from "react-scroll-to-bottom";
 import * as actions from "../../redux/actions/Index";
 import UiGroupChat from "../uiGroupChat/UiGroupChat";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import FaceTime from "../faceTime/FaceTime";
 
 let arrImg = [];
 
@@ -35,6 +36,8 @@ function Chat(props) {
   const [dataUserChoose, setDataUserChoose] = useState(null);
   const [isOpenEditChat, setIsOpenEditChat] = useState(false);
   const arrFriendNews = useRef([]);
+  const [dataCall, setDataCall] = useState(null);
+  const [openFaceTime, setOpenFaceTime] = useState(false);
 
   useEffect(() => {
     let roomIdTemp = "";
@@ -76,65 +79,92 @@ function Chat(props) {
     stateHistory ? setDataFriend(arrConcat) : setDataFriend(arrTemp?.current);
 
     try {
-      let arrTemp = [];
-
       isRender && personalRequest(setShowLoading, username);
       setIsRender(false);
 
-      db.ref()
-        .child("chat_info")
-        .orderByChild(`containId/${idUser}/id`)
-        .equalTo(idUser)
-        .on(`value`, (snapshot) => {
+      const getDataChatRequest = async () => {
+        let data = {};
+        let arrTemp = [];
+        await db
+          .ref()
+          .child("chat_info")
+          .orderByChild(`containId/${idUser}/id`)
+          .equalTo(idUser)
+          .on("value", (snapshot) => {
+            if (snapshot.val() !== null)
+              for (const [key, value] of Object.entries(snapshot.val())) {
+                if (_.size(value?.containId) === 2) {
+                  for (const [keyId, valueId] of Object.entries(
+                    value?.containId
+                  )) {
+                    if (valueId?.id !== idUser) {
+                      data = {
+                        ...valueId,
+                        idRoom: key,
+                        lastTime: value?.lastTime,
+                      };
+                      arrTemp.push(data);
 
-          snapshot.forEach((snap) => {
-            if (_.size(snap.val().containId) === 2) {
-              for (const [key, value] of Object.entries(snap.val().containId)) {
-                if (value?.id !== idUser) {
-                  //lay danh sach user de hien thi
-                  arrTemp.push(value);
+                      //check xem co stateHistory hay khong
+                      if (stateHistory !== undefined) {
+                        if (stateHistory?.id !== valueId?.id) {
+                          arrTemp.push(stateHistory);
+                        }
+                      }
 
-                  //check xem co stateHistory hay khong
-                  if (stateHistory !== undefined) {
-                    if (stateHistory?.id !== value?.id) {
-                      arrTemp.push(stateHistory);
+                      if (dataUserChoose !== null) {
+                        if (dataUserChoose?.id === valueId?.id) {
+                          roomIdTemp = value.idRoom;
+                          setRoomId(roomIdTemp);
+                        }
+                      }
                     }
-                  }
 
+                    // console.log(arrTemp);
+
+                    // console.log(
+                    //   _.uniqWith(
+                    //     _.sortBy(arrTemp, ["lastTime"], ["desc"]),
+                    //     _.isEqual
+                    //   )
+                    // );
+
+                    setDataFriend(
+                      _.uniqWith(
+                        _.sortBy(arrTemp, ["lastTime"], ["desc"]),
+                        _.isEqual
+                      )
+                    );
+                  }
+                } else {
+                  arrTemp.push(value);
+                  setDataFriend(_.uniqWith(arrTemp, _.isEqual));
                   if (dataUserChoose !== null) {
-                    if (dataUserChoose?.id === value?.id) {
-                      roomIdTemp = snap.val().idRoom;
+                    if (dataUserChoose.idRoom === value.idRoom) {
+                      roomIdTemp = value.idRoom;
                       setRoomId(roomIdTemp);
                     }
                   }
                 }
-                setDataFriend(_.uniqWith(arrTemp, _.isEqual));
               }
+
+            if (roomIdTemp !== "") {
+              db.ref("chat_messages/" + roomIdTemp).on("value", (snapshot) => {
+                const chatTemp = [];
+                if (snapshot.val() !== null)
+                  for (const [key, value] of Object.entries(snapshot.val())) {
+                    chatTemp.push(value);
+                  }
+                setChat(chatTemp);
+              });
             } else {
-              arrTemp.push(snap.val());
-              setDataFriend(_.uniqWith(arrTemp, _.isEqual));
-              if (dataUserChoose !== null) {
-                if (dataUserChoose.idRoom === snap.val().idRoom) {
-                  roomIdTemp = snap.val().idRoom;
-                  setRoomId(roomIdTemp);
-                }
-              }
+              setChat([]);
+              setRoomId("");
             }
           });
-          if (roomIdTemp !== "") {
-            db.ref("chat_messages/" + roomIdTemp).on("value", (snapshot) => {
-              const chatTemp = [];
-              if (snapshot.val() !== null)
-                for (const [key, value] of Object.entries(snapshot.val())) {
-                  chatTemp.push(value);
-                }
-              setChat(chatTemp);
-            });
-          } else {
-            setChat([]);
-            setRoomId("");
-          }
-        });
+      };
+
+      getDataChatRequest();
     } catch (error) {
       console.log(error);
     }
@@ -203,6 +233,7 @@ function Chat(props) {
 
     try {
       if (roomId !== "") {
+        // update message
         content !== "" &&
           (await db.ref(`chat_messages/${roomId}`).push({
             content: content,
@@ -214,15 +245,9 @@ function Chat(props) {
             time: Date.now(),
           }));
         content !== "" &&
-          (await db.ref(`chat_info/${roomId}`).set({
-            containId: arrContainId,
-            idRoom: roomId,
-            imageSrc: "",
-            name: "",
-            username: "",
-            lastTime: Date.now(),
-          }));
+          (await db.ref(`chat_info/${roomId}/lastTime`).set(Date.now()));
       } else {
+        // new message
         const getKey =
           content !== "" && (await db.ref("chat_info").push()).getKey();
         content !== "" &&
@@ -258,7 +283,7 @@ function Chat(props) {
 
   const handleClickUser = (item) => {
     setDataUserChoose(item);
-    setColorChoose(item.id);
+    setColorChoose(item.idRoom);
     setDataHistory("");
     setColorHistory("");
   };
@@ -285,8 +310,28 @@ function Chat(props) {
     console.log(e);
   };
 
+  // console.log(
+  //   _.uniqBy(dataFriend, "idRoom")?.filter((item) => item?.idRoom !== undefined)
+  // );
+
+  // console.log(
+  //   _.orderBy(
+  //     _.uniqBy(dataFriend, "idRoom")?.filter(
+  //       (item) => item?.idRoom !== undefined
+  //     ),
+  //     ["lastTime"],
+  //     ["desc"]
+  //   )
+  // );
+
+  const handleOpenFacetime = (data) => {
+    setDataCall(data);
+    setOpenFaceTime(true);
+  };
+
   return (
     <div>
+      {openFaceTime && <FaceTime dataCall={dataCall} />}
       {showLoading && <GlobalLoading />}
       <UiGroupChat
         openGroupChat={openGroupChat}
@@ -308,14 +353,20 @@ function Chat(props) {
               ></i>
             </div>
             <div className="contentChat-bottom-left">
-              {_.uniqWith(dataFriend, _.isEqual)?.map((item, index) => {
+              {_.orderBy(
+                _.uniqBy(dataFriend, "idRoom")?.filter(
+                  (item) => item?.idRoom !== undefined
+                ),
+                ["lastTime"],
+                ["desc"]
+              )?.map((item, index) => {
                 return (
                   <div
                     className="item-leftChat"
                     key={index}
                     onClick={() => handleClickUser(item)}
                     style={
-                      colorChoose === item?.id
+                      colorChoose === item?.idRoom
                         ? { backgroundColor: "#efefef" }
                         : null
                     }
@@ -360,6 +411,12 @@ function Chat(props) {
                 </div>
                 <div className="rightChat_top-right">
                   <i
+                    className="fas fa-video"
+                    id="rightChat_top-right"
+                    style={{ marginRight: 10 }}
+                    onClick={() => handleOpenFacetime(dataUserChoose)}
+                  ></i>
+                  <i
                     className="fas fa-info-circle"
                     id="rightChat_top-right"
                     onClick={() => handleEditChat()}
@@ -375,7 +432,6 @@ function Chat(props) {
                   }
                 >
                   {chat?.map((item, index) => {
-                    console.log(item);
                     return (
                       <div key={index}>
                         {item?.idUser !== idUser && item?.content !== "" && (

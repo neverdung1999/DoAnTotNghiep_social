@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./notificationToast.css";
 import { db } from "../../../services/firebase";
+import DetailsPost from "../../detailsPost/DetailsPost";
 
 function NotificationToast(props) {
   const { data, idNotification } = props;
+
+  const [dataDetailsPost, setDataDetailsPost] = useState(null);
+  const [openDetailsPost, setOpenDetailsPost] = useState(false);
 
   useEffect(() => {
     const ref = db.ref("/social_network");
@@ -24,7 +28,6 @@ function NotificationToast(props) {
             for (const [key] of Object.entries(snapshot.val())) {
               setTimeout(async () => {
                 const test = await dispatchNotification(key);
-                console.log(test);
               }, 5000);
             }
         });
@@ -32,21 +35,39 @@ function NotificationToast(props) {
     notificationRequest();
   }, [idNotification]);
 
+  const handleOpenPost = async (data) => {
+    setDataDetailsPost(data);
+    setOpenDetailsPost(true);
+  };
+
+  const onCloseForm = (e) => {
+    setOpenDetailsPost(e);
+  };
+
   return (
     <div>
+      {openDetailsPost && (
+        <DetailsPost
+          dataDetailsPost={dataDetailsPost}
+          onCloseForm={onCloseForm}
+        />
+      )}
       <div className="backgroundNotiToast">
         {data?.map((data, index) => {
           return (
             <div key={index}>
-              {
-                !data?.isShow && <div
+              {!data?.isShow && (
+                <div
                   className="animationToast"
                   style={{
                     animation:
                       "show_toast ease 1s, hide_toast ease 1s 3s forwards",
                   }}
                 >
-                  <div className="backgroundNotiToast_form">
+                  <div
+                    className="backgroundNotiToast_form"
+                    onClick={() => handleOpenPost(data)}
+                  >
                     <div className="backgroundNotiToast_top">
                       <i
                         className="fas fa-times"
@@ -70,7 +91,7 @@ function NotificationToast(props) {
                     </div>
                   </div>
                 </div>
-              }
+              )}
             </div>
           );
         })}

@@ -8,9 +8,7 @@ import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
 import TimeStamp from "../../timeStamp";
-import { db } from "../../services/firebase";
 import { Slide } from "react-slideshow-image";
-import ReactHtmlParser from "react-html-parser";
 import * as actions from "../../redux/actions/Index";
 import DetailsPost from "../detailsPost/DetailsPost";
 import CardLoading from "../animation/cardLoading/CardLoading";
@@ -29,11 +27,9 @@ function Post(props) {
   const [showLoadingComment, setShowLoadingComment] = useState(false);
   const [openDataDetailsPost, setOpenDataDetailsPost] = useState(false);
   const [likePost, setLikePost] = useState([]);
-  const [contentChat, setContentChat] = useState([]);
-  const [countComment, setCountComment] = useState([]);
 
   useEffect(() => {
-    isRender && props.getPostRequest(setShowLoading, idCookies);
+    if (idCookies) isRender && props.getPostRequest(setShowLoading, idCookies);
     setIsRender(false);
     setDataNewsPost(dataPost);
     let arrTemp = [];
@@ -73,50 +69,9 @@ function Post(props) {
         idCookies,
         content,
         [item?.id_account],
-        setShowLoadingComment,
-        "post"
+        setShowLoadingComment
       );
       setContent("");
-
-      setCountComment([...countComment, content]);
-
-      try {
-        const ref = db.ref("/social_network");
-        const usersRef = ref.child("users");
-        const postsRef = ref.child("posts");
-
-        const getUser = async (id) => {
-          let data = {};
-          if (id === undefined) return data;
-          await usersRef.child(id).once("value", (snap) => {
-            if (snap.val() !== null) {
-              const { username, imageSrc } = snap.val();
-              data = { username, accountImage: imageSrc };
-            }
-          });
-          return data;
-        };
-
-        const fetchDataComment = async () => {
-          const arrTempChatTemp = [];
-          postsRef
-            .child(`${idPost}/comments`)
-            .on("child_added", async (snapshot) => {
-              const { id_account: userId } = snapshot.val();
-              const test = [];
-              let getData = await getUser(userId);
-              let data = { ...snapshot.val(), ...getData, id_post: idPost };
-              arrTempChatTemp.push(data);
-              arrTempChatTemp?.forEach((item) => {
-                test.push(item);
-              });
-              setContentChat(_.sortBy(test, "timestamp"));
-            });
-        };
-        fetchDataComment();
-      } catch (error) {
-        console.log(error);
-      }
     }
   };
 
@@ -128,7 +83,7 @@ function Post(props) {
       removeItem = likePost.filter((e) => e !== idPost);
     }
     setLikePost(removeItem);
-    props.likePostRequest(idPost, idOwner, idCookies, setShowLoading);
+    props.likePostRequest(idPost, idOwner, idCookies, setShowLoadingComment);
   };
 
   return (
@@ -137,6 +92,7 @@ function Post(props) {
         <DetailsPost
           dataDetailsPost={dataDetailsPost}
           onCloseForm={onCloseForm}
+          typePost="allPost"
         />
       )}
       {showLoading && (
@@ -252,71 +208,9 @@ function Post(props) {
                           className="topItem_bottom-top"
                           onClick={() => handleClickChoosePost(item)}
                         >
-                          Xem tất cả {item?.comments.length} bình luận
+                          Xem tất cả {item?.comments} bình luận
                         </div>
                       )}
-                      {!_.isEmpty(item?.comments) && (
-                        <div>
-                          {item?.comments[item?.comments.length - 2] && (
-                            <div className="topItem_bottom-bottom">
-                              <b>
-                                {
-                                  item?.comments[item?.comments.length - 2]
-                                    ?.username
-                                }
-                              </b>
-                              {ReactHtmlParser(
-                                item?.comments[item?.comments.length - 2]
-                                  ?.content
-                              )}
-                            </div>
-                          )}
-
-                          {item?.comments[item?.comments.length - 1] && (
-                            <div className="topItem_bottom-bottom">
-                              <b>
-                                {ReactHtmlParser(
-                                  item?.comments[item?.comments.length - 1]
-                                    ?.username
-                                )}
-                              </b>
-                              {
-                                item?.comments[item?.comments.length - 1]
-                                  ?.content
-                              }
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* {countComment?.map((comment, index) => {
-                        const arrAsc = _.orderBy(
-                          contentChat,
-                          ["timestamp"],
-                          ["desc"]
-                        );
-                        console.log(arrAsc);
-                        return (
-                          <div key={index}>
-                            {item?.id_post ===
-                              arrAsc[countComment.length - (index + 1)]
-                                ?.id_post && (
-                              <div className="topItem_bottom-bottom">
-                                <b>
-                                  {ReactHtmlParser(
-                                    arrAsc[countComment.length - (index + 1)]
-                                      ?.username
-                                  )}
-                                </b>
-                                {
-                                  arrAsc[countComment.length - (index + 1)]
-                                    ?.content
-                                }
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })} */}
                       <div className="topItem_bottom-bottom">
                         <p id="topItem_bottom-bottom">
                           {TimeStamp(item?.timestamp)}
@@ -391,8 +285,15 @@ const mapDispatchToProps = (dispatch) => {
     getPostRequest: (setShowLoading, id) => {
       dispatch(actions.getPostRequest(setShowLoading, id));
     },
-    likePostRequest: (idPost, idOwner, idCookies) => {
-      dispatch(actions.likePostRequest(idPost, idOwner, idCookies));
+    likePostRequest: (idPost, idOwner, idCookies, setShowLoadingComment) => {
+      dispatch(
+        actions.likePostRequest(
+          idPost,
+          idOwner,
+          idCookies,
+          setShowLoadingComment
+        )
+      );
     },
     commentPostRequest: (
       idPost,
@@ -400,8 +301,7 @@ const mapDispatchToProps = (dispatch) => {
       idAccount,
       content,
       mentionList,
-      setShowLoadingComment,
-      typeComment
+      setShowLoadingComment
     ) => {
       dispatch(
         actions.commentPostRequest(
@@ -410,8 +310,7 @@ const mapDispatchToProps = (dispatch) => {
           idAccount,
           content,
           mentionList,
-          setShowLoadingComment,
-          typeComment
+          setShowLoadingComment
         )
       );
     },

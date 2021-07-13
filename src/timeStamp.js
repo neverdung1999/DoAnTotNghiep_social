@@ -16,7 +16,7 @@ const timeStamp = (time) => {
     results = resultsMin + " phút trước";
   } else if (resultsOur <= 24) {
     results = resultsOur + " tiếng trước";
-  } else if (resultsDay <= 2) {
+  } else if (resultsDay <= 6) {
     results = resultsDay + " ngày trước";
   } else {
     results = resultsDetails;

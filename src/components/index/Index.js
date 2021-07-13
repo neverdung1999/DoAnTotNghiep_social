@@ -75,7 +75,8 @@ function Index(props) {
 const mapStateToProps = (state) => {
   return {
     isLogin: state.User.dataUser,
+    dataAllUser: state.User.dataAllUser,
   };
 };
 
-export default connect(mapStateToProps, null)(Index);
+export default connect(mapStateToProps)(Index);

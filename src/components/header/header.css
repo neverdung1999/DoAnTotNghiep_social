@@ -134,6 +134,7 @@ button{
 }
 
 .function-nav{
+    position: relative;
     display: flex;
     width: 25%;
     height: 100%;
@@ -233,4 +234,20 @@ button{
 
 .sc-bwzfXH .bWZouD{
     background-color: red;
+}
+
+.countNotification{
+    position: absolute;
+    display: flex;
+    width: 23px;
+    height: 23px;
+    top: 0;
+    right: 93px;
+    border-radius: 50%;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background-color: red;
+    font-size: 11px;
 }

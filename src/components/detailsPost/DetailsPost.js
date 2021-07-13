@@ -17,7 +17,7 @@ import CardLoading from "../animation/cardLoading/CardLoading";
 import { db } from "../../services/firebase";
 
 function DetailsPost(props) {
-  const { dataDetailsPost, getDetailPost } = props;
+  const { dataDetailsPost, getDetailPost, typePost } = props;
   const cookies = new Cookies();
   const idCookies = cookies.get("user");
   const [likePost, setLikePost] = useState([]);
@@ -33,8 +33,8 @@ function DetailsPost(props) {
     username: "",
   });
   const [contentChat, setContentChat] = useState([]);
+  const [contentPost, setContentPost] = useState([]);
   const [contentReplyChat, setContentReplyChat] = useState([]);
-  const [countLike, setCountLike] = useState([]);
 
   useEffect(() => {
     const idPost = dataDetailsPost?.id_post;
@@ -48,8 +48,8 @@ function DetailsPost(props) {
 
     setDataDetailsPost(getDetailPost[0]);
     let arrTemp = [];
-    if (dataDetailsPost?.likes) {
-      for (const [key] of Object.entries(dataDetailsPost?.likes)) {
+    if (getDetailPost[0]?.likes) {
+      for (const [key] of Object.entries(getDetailPost[0]?.likes)) {
         if (key === idCookies) {
           arrTemp.push(dataDetailsPost?.id_post);
         }
@@ -57,77 +57,79 @@ function DetailsPost(props) {
       setLikePost(_.uniqWith(arrTemp, _.isEqual));
     }
 
-      try {
-        const ref = db.ref("/social_network");
-        const usersRef = ref.child("users");
-        const postsRef = ref.child("posts");
+    try {
+      const ref = db.ref("/social_network");
+      const usersRef = ref.child("users");
+      const postsRef = ref.child("posts");
 
-        const getUser = async (id) => {
-          let data = {};
-          if (id === undefined) return data;
-          await usersRef.child(id).once("value", (snap) => {
-            if (snap.val() !== null) {
-              const { username, imageSrc } = snap.val();
-              data = { username, accountImage: imageSrc };
-            }
+      const getUser = async (id) => {
+        let data = {};
+        if (id === undefined) return data;
+        await usersRef.child(id).once("value", (snap) => {
+          if (snap.val() !== null) {
+            const { username, imageSrc } = snap.val();
+            data = { username, accountImage: imageSrc };
+          }
+        });
+        return data;
+      };
+
+      const fetchDataCommentTest = async (idPost, idKey) => {
+        let data = {};
+        if (idPost === undefined || idKey === undefined) return data;
+        await postsRef
+          .child(`${idPost}/comments`)
+          .child(idKey)
+          .once("value", (snap) => {
+            data = { id_comment: snap.key };
           });
-          return data;
-        };
+        return data;
+      };
 
-        const fetchDataCommentTest = async (idPost, idKey) => {
-          let data = {};
-          if (idPost === undefined || idKey === undefined) return data;
-          await postsRef
-            .child(`${idPost}/comments`)
-            .child(idKey)
-            .once("value", (snap) => {
-              data = { id_comment: snap.key };
-            });
-          return data;
-        };
+      const fetchDataComment = async () => {
+        let data = {};
+        let dataReply = {};
+        await postsRef.child(`${idPost}`).on("value", async (snap) => {
+          const arrTemp = [];
+          const arrReplyTemp = [];
+          const arrLikesTemp = [];
 
-        const fetchDataComment = async () => {
-          let data = {};
-          let dataReply = {};
-          await postsRef.child(`${idPost}`).on("value", async (snap) => {
-            const arrTemp = [];
-            const arrReplyTemp = [];
-            const arrLikesTemp = [];
+          setContentPost(snap.val());
 
-            if (snap.val()?.likes)
-              for (const [key] of Object.entries(snap.val()?.likes)) {
-                arrLikesTemp.push(key);
-              }
+          if (snap.val()?.likes)
+            for (const [key] of Object.entries(snap.val()?.likes)) {
+              arrLikesTemp.push(key);
+            }
 
-            if (snap.val()?.comments)
-              for (const [key, value] of Object.entries(snap.val()?.comments)) {
-                const testnhaaa = await fetchDataCommentTest(idPost, key);
-                let dataUser = await getUser(value?.id_account);
-                data = await { ...value, ...dataUser, ...testnhaaa };
-                arrTemp.push(data);
+          if (snap.val()?.comments)
+            for (const [key, value] of Object.entries(snap.val()?.comments)) {
+              const testnhaaa = await fetchDataCommentTest(idPost, key);
+              let dataUser = await getUser(value?.id_account);
+              data = await { ...value, ...dataUser, ...testnhaaa };
+              arrTemp.push(data);
 
-                if (data?.reply) {
-                  for (const [key, value] of Object.entries(data?.reply)) {
-                    let dataUserReply = await getUser(value?.id_account);
-                    dataReply = await {
-                      ...value,
-                      ...dataUserReply,
-                      ...testnhaaa,
-                    };
-                    arrReplyTemp.push(dataReply);
-                  }
+              if (data?.reply) {
+                for (const [key, value] of Object.entries(data?.reply)) {
+                  let dataUserReply = await getUser(value?.id_account);
+                  dataReply = await {
+                    ...value,
+                    ...dataUserReply,
+                    ...testnhaaa,
+                  };
+                  arrReplyTemp.push(dataReply);
                 }
               }
-            setCountLike(arrLikesTemp);
-            setContentChat(arrTemp);
-            setContentReplyChat(arrReplyTemp);
-          });
-        };
+            }
+          setContentChat(arrTemp);
+          setContentReplyChat(arrReplyTemp);
+          setShowLoading(false);
+        });
+      };
 
-        fetchDataComment();
-      } catch (error) {
-        console.log(error);
-      }
+      fetchDataComment();
+    } catch (error) {
+      console.log(error);
+    }
   }, [isRender, dataDetailsPost, idCookies, props, getDetailPost]);
 
   const onCloseFrom = () => {
@@ -173,8 +175,7 @@ function DetailsPost(props) {
           idCookies,
           contentMessage,
           [dataDetailsPost?.id_account],
-          setShowLoadingComment,
-          "detailsPost"
+          setShowLoadingComment
         )
       : props.commentReplyPostRequest(
           //reply comment
@@ -206,7 +207,8 @@ function DetailsPost(props) {
       props.likePostRequest(
         dataDetailsPost?.id_post,
         dataDetailsPost?.id_account,
-        idCookies
+        idCookies,
+        typePost
       );
     }
   };
@@ -217,6 +219,7 @@ function DetailsPost(props) {
         <UiUpdatePost
           onCloseForm={onCloseForm}
           dataDetailPost={dataDetailPost}
+          setOpenUiUpdatePost={setOpenUiUpdatePost}
         />
       )}
       <div className="backgroundPost">
@@ -235,7 +238,7 @@ function DetailsPost(props) {
                 transitionDuration={300}
                 arrows={dataDetailPost?.imageSrc?.lenght === 1 ? false : true}
               >
-                {dataDetailPost?.imageSrc?.map((item, index) => {
+                {contentPost?.imageSrc?.map((item, index) => {
                   return (
                     <img
                       key={index}
@@ -289,7 +292,7 @@ function DetailsPost(props) {
                       <a href="#" id="right_name-a">
                         {dataDetailPost?.username}
                       </a>
-                      <p id="right_name-p">{dataDetailPost?.content}</p>
+                      <p id="right_name-p">{contentPost?.content}</p>
                       <span id="right_name-span">
                         {" "}
                         {TimeStamp(dataDetailPost?.timestamp)}{" "}
@@ -462,7 +465,7 @@ function DetailsPost(props) {
                   </div>
                   <div className="bottom_top-body">
                     <p id="top_body-heart">
-                      {_.size(countLike)} lượt thích
+                      {_.size(dataDetailPost?.likes)} lượt thích
                     </p>
                   </div>
                   <div className="bottom_top-bottom">
@@ -549,8 +552,8 @@ const mapDispatchToProps = (dispatch) => {
         )
       );
     },
-    likePostRequest: (idPost, idOwner, idCookies) => {
-      dispatch(actions.likePostRequest(idPost, idOwner, idCookies));
+    likePostRequest: (idPost, idOwner, idCookies, typePost) => {
+      dispatch(actions.likePostRequest(idPost, idOwner, idCookies, typePost));
     },
     commentPostRequest: (
       idPost,
@@ -558,8 +561,7 @@ const mapDispatchToProps = (dispatch) => {
       idAccount,
       content,
       mentionList,
-      setShowLoadingComment,
-      typeComment
+      setShowLoadingComment
     ) => {
       dispatch(
         actions.commentPostRequest(
@@ -568,8 +570,7 @@ const mapDispatchToProps = (dispatch) => {
           idAccount,
           content,
           mentionList,
-          setShowLoadingComment,
-          typeComment
+          setShowLoadingComment
         )
       );
     },

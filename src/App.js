@@ -22,10 +22,10 @@ function App(props) {
 
       const getUser = async (id) => {
         let data;
-        if  (id === null) return data;
+        if (id === null) return data;
         await userRef.child(id).once("value", (snap) => {
-          const {imageSrc, username} = snap.val();
-          data = {imageSrc, username};
+          const { imageSrc, username } = snap.val();
+          data = { imageSrc, username };
         });
         return data;
       };
@@ -37,17 +37,15 @@ function App(props) {
           const arrNotiContentTemp = [];
           for (const [key, value] of Object.entries(snapshot.val())) {
             if (value?.key === idCookies) {
-               setNotification(key);
+              setNotification(key);
               if (value?.notification) arrNotiTemp.push(value?.notification);
             }
           }
           if (arrNotiTemp[0]) {
             for (const [key, value] of Object.entries(arrNotiTemp[0])) {
-              if (!value?.hasSeen) {
-                let dataUser = await getUser(value?.id_account)
-                data = await {...value, ...dataUser};
-                arrNotiContentTemp.push(data);
-              }
+              let dataUser = await getUser(value?.id_account);
+              data = await { ...value, ...dataUser };
+              arrNotiContentTemp.push(data);
             }
             setArrNotiContent(arrNotiContentTemp);
           }
@@ -78,7 +76,7 @@ function App(props) {
 
   return (
     <Router>
-      <Header />
+      <Header data={arrNotiContent} idNotification={idNotification} />
       <NotificationToast
         data={arrNotiContent}
         idNotification={idNotification}

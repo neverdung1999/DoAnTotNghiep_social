@@ -7,18 +7,23 @@ import { Popup } from "diginet-core-ui/components";
 import * as actions from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
-let arrTest = [];
 let arrTemp = [];
 
 function AddNews(props) {
-  const { personal, openFromAddNews, setOpenFormAddNews, dataDetailPost } =
-    props;
+  const {
+    personal,
+    openFromAddNews,
+    setOpenFormAddNews,
+    dataDetailPost,
+    setOpenUiUpdatePost,
+  } = props;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
   const idUser = cookies.get("user");
   const [img, setImg] = useState([]);
   const [content, setContent] = useState("");
   const [isRender, setIsRender] = useState(true);
+  const [dataPost, setDataPost] = useState([]);
   const [showLoading, setShowLoading] = useState(false);
   const [popupNotification, setPopupNotification] = useState(false);
 
@@ -32,11 +37,17 @@ function AddNews(props) {
       }
       setImg(arrTemp);
     }
+    dataDetailPost === undefined
+      ? setDataPost(personal)
+      : setDataPost(dataDetailPost);
     setIsRender(false);
-  }, [dataDetailPost, isRender, img, cookies]);
+  }, [dataDetailPost, isRender, img, cookies, personal]);
 
   const onCloseForm = () => {
     props.onCloseForm(false);
+    setImg([]);
+    setContent("");
+    arrTemp = [];
   };
 
   const callApiImage = (value) => {
@@ -50,8 +61,9 @@ function AddNews(props) {
     fetch("https://api.Cloudinary.com/v1_1/baby-dont-cry/image/upload", options)
       .then((response) => response.json())
       .then((response) => {
-        arrTest.push(response.url);
-        setImg(arrTest);
+        arrTemp.push(response.url);
+        console.log(arrTemp);
+        setImg(arrTemp);
       })
       .catch((error) => {
         console.log(error);
@@ -79,7 +91,7 @@ function AddNews(props) {
       setPopupNotification(true);
     } else {
       setShowLoading(true);
-      !dataDetailPost
+      dataDetailPost === undefined
         ? props.postNewsRequest(
             idUser,
             img,
@@ -88,11 +100,13 @@ function AddNews(props) {
             setOpenFormAddNews
           )
         : props.updatePostRequest(
-            idUser,
+            dataDetailPost?.id_post,
             img,
             content,
             setShowLoading,
-            setOpenFormAddNews
+            setOpenFormAddNews,
+            setOpenUiUpdatePost,
+            idUser
           );
       setContent("");
       setImg([]);
@@ -141,10 +155,18 @@ function AddNews(props) {
         <div className="backgroundAddfr_form-body">
           <div className="form_body-top">
             <div className="body_top-img">
-              <img src={personal?.imageSrc} alt="" id="body_top-img" />
+              <img
+                src={
+                  dataPost?.accountImage
+                    ? dataPost?.accountImage
+                    : dataPost?.imageSrc
+                }
+                alt=""
+                id="body_top-img"
+              />
             </div>
             <div className="body_top-name">
-              <p>{personal?.username}</p>
+              <p>{dataPost?.username}</p>
             </div>
           </div>
           <div className="form_body-body">
@@ -154,7 +176,7 @@ function AddNews(props) {
               cols="30"
               rows="10"
               onChange={(e) => handleChange(e)}
-              placeholder={`${personal?.name} ơi, bạn đang nghĩ gì thế ?`}
+              placeholder={`${dataPost?.name} ơi, bạn đang nghĩ gì thế ?`}
               value={content}
             ></textarea>
           </div>
@@ -231,7 +253,9 @@ const mapDispatchToProps = (dispatch) => {
       img,
       content,
       setShowLoading,
-      setOpenFormAddNews
+      setOpenFormAddNews,
+      setOpenUiUpdatePost,
+      idUser
     ) => {
       dispatch(
         actions.updatePostRequest(
@@ -239,7 +263,9 @@ const mapDispatchToProps = (dispatch) => {
           img,
           content,
           setShowLoading,
-          setOpenFormAddNews
+          setOpenFormAddNews,
+          setOpenUiUpdatePost,
+          idUser
         )
       );
     },

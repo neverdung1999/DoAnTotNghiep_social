@@ -1,57 +1,45 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import "./header.css";
+import _ from "lodash";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
+import { db } from "../../services/firebase";
 import { useHistory } from "react-router-dom";
 import logo from "../../uploads/img/logo.png";
 import * as Actions from "../../redux/actions/Index";
+import Notification from "../notification/Notification";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Header(props) {
-  const { logoutUser } = props;
+  const { logoutUser, data, idNotification, dataUser, dataAllUser } = props;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
   const history = useHistory();
   const dataCookies = cookies?.get("data");
   const username = cookies?.get("username");
+  const [isOpenNoti, setIsOpenNoti] = useState(false);
   const [isOpenForm, setIsOpenForm] = useState(false);
-  const [isOpenHeader, setIsOpenHeader] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-
-  const items = [
-    {
-      id: 0,
-      name: "Cobol",
-    },
-    {
-      id: 1,
-      name: "JavaScript",
-    },
-    {
-      id: 2,
-      name: "Basic",
-    },
-    {
-      id: 3,
-      name: "PHP",
-    },
-    {
-      id: 4,
-      name: "Java",
-    },
-  ];
+  const [isOpenHeader, setIsOpenHeader] = useState(false);
+  const [countNoti, setCountNoti] = useState([]);
 
   useEffect(() => {
     if (cookies.get("user")) {
+      const arrTemp = [];
       setIsOpenHeader(true);
+      data?.forEach((value) => {
+        !value?.hasSeen && arrTemp.push(value);
+      });
+      setCountNoti(arrTemp);
+      props.getAllUserRequest();
     } else {
       setIsOpenHeader(false);
       history.push("/login");
     }
-  }, [cookies, history]);
+  }, [data, dataUser]);
 
   const openFormDropDown = () => {
     setIsOpenForm(!isOpenForm);
@@ -60,11 +48,51 @@ function Header(props) {
   const signOut = () => {
     props.logOutRequest(cookies?.get("user"));
     logoutUser();
-    };
+  };
 
   const handleChangeUser = () => {
     setShowLoading(true);
     props.personalRequest(setShowLoading, username);
+  };
+
+  const onCloseForm = (e) => {
+    setIsOpenNoti(e);
+  };
+
+  const handleOpenNoti = () => {
+    setIsOpenNoti(!isOpenNoti);
+    try {
+      const ref = db.ref("social_network");
+      const notiRef = ref.child(`notifications`);
+
+      const dispatchNotiRequest = async (id) => {
+        if (id === null) return;
+        await notiRef
+          .child(`${idNotification}/notification/${id}/hasSeen`)
+          .set(true);
+      };
+
+      const getNotiRequest = async () => {
+        await notiRef
+          .child(`${idNotification}/notification`)
+          .once("value", async (snapshot) => {
+            if (snapshot.val() === null) return;
+            for (const [key, value] of Object.entries(snapshot.val())) {
+              if (!value?.hasSeen && !isOpenNoti) {
+                await dispatchNotiRequest(key);
+              }
+            }
+          });
+      };
+
+      getNotiRequest();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleOnSelect = (e) => {
+    window.location.replace(`http://localhost:3000/personal/${e?.username}`);
   };
 
   return (
@@ -74,22 +102,22 @@ function Header(props) {
         className="header"
         style={isOpenHeader ? { display: "block" } : { display: "none" }}
       >
+        {isOpenNoti && <Notification data={data} onCloseForm={onCloseForm} />}
         <div className="container">
           <div className="logo">
             <Link to="/">
-              <img src={logo} id="logo" alt=""  />
+              <img src={logo} id="logo" alt="" />
             </Link>
           </div>
           <div className="search-nav">
             {/* <input type="text" id="input-search-nav" placeholder="Tìm kiếm" /> */}
             <div className="search_nav-wrapper">
               <ReactSearchAutocomplete
-                items={items}
-                // onSearch={handleOnSearch}
-                // onHover={handleOnHover}
-                // onSelect={handleOnSelect}
-                // onFocus={handleOnFocus}
-                autoFocus
+                items={dataAllUser}
+                onSelect={handleOnSelect}
+                fuseOptions={{ keys: ["username"] }}
+                resultStringKeyName="username"
+                placeholder="Tìm kiếm..."
                 styling={{
                   height: "34px",
                   marginTop: "10px",
@@ -99,6 +127,9 @@ function Header(props) {
             </div>
           </div>
           <div className="function-nav">
+            <Link to="/apartment">
+              <i className="fas fa-hotel"></i>
+            </Link>
             <Link to="/">
               <i className="fas fa-home"></i>
             </Link>
@@ -106,36 +137,15 @@ function Header(props) {
               <i className="far fa-paper-plane"></i>
             </Link>
             <a href="#">
-              <i className="far fa-compass"></i>
+              <i
+                className="far fa-compass"
+                style={{ position: "relative" }}
+                onClick={() => handleOpenNoti()}
+              ></i>
+              {!_.isEmpty(countNoti) && (
+                <div className="countNotification">{_.size(countNoti)}</div>
+              )}
             </a>
-            <div className="dropdown-notification">
-              <div className="dropdown-content-notification">
-                <div className="all-content-notification">
-                  <div className="img-notification">
-                    <a href="#">
-                      <img
-                        src="./uploads/imgs/duc.jpg"
-                        alt=""
-                        id="img-notification"
-                      />
-                    </a>
-                  </div>
-                  <div className="content-notification">
-                    <a href="#" id="a-notification">
-                      <span id="span-content-notification">
-                        Lê Minh Đức
-                        <p id="p-content-notification">đã theo dõi bạn</p>
-                      </span>
-                    </a>
-                  </div>
-                  <div className="follow-notification">
-                    <a href="#" id="a-notification">
-                      <p id="follow-now-notification">Theo dõi</p>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="dropdown-avt" onClick={() => openFormDropDown()}>
               <img src={dataCookies?.imageSrc} alt="" id="avt" />
@@ -177,7 +187,8 @@ function Header(props) {
 
 const mapStateToProps = (state) => {
   return {
-    dataUser: state.Personal,
+    dataUser: state.Post,
+    dataAllUser: state.User.dataAllUser,
   };
 };
 
@@ -191,6 +202,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     logOutRequest: (id) => {
       dispatch(Actions.logOutRequest(id));
+    },
+    getAllUserRequest: () => {
+      dispatch(Actions.getAllUserRequest());
     },
   };
 };

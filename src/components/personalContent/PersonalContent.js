@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./personalContent.css";
+import _ from "lodash";
 import { pure } from "recompose";
 import { connect } from "react-redux";
 import DetailsPost from "../detailsPost/DetailsPost";
@@ -19,8 +20,6 @@ function PersonalContent(props) {
     }
   }, [getPostRequestById, idDataUserApi]);
 
-  console.log(dataDetailsPost);
-
   const handleChoosePost = (data) => {
     setOpenDetailsPost(true);
     setDataDetailsPost(data);
@@ -36,11 +35,12 @@ function PersonalContent(props) {
         <DetailsPost
           dataDetailsPost={dataDetailsPost}
           onCloseForm={onCloseForm}
+          typePost="postById"
         />
       )}
-      {showLoading && <GlobalLoading  />}
+      {showLoading && <GlobalLoading />}
       <div className="bodyContainer_bottom">
-        {dataPost?.map((item, index) => {
+        {_.orderBy(dataPost, ["timestamp"], ["desc"])?.map((item, index) => {
           return (
             <div key={index}>
               <div className="bodyContainer_bottom-item">

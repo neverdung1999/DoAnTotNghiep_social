@@ -4,6 +4,8 @@ import NotFoundPage from "./page/notFoundPage/NotFoundPage";
 import PersonalPage from "./page/personalPage/PersonalPage";
 import Index from "./page/indexPage/IndexPage";
 import ChatPage from "./page/chatPage/ChatPage";
+import ApartmentPage from "./page/apartmentPage/ApartmentPage";
+import VnpayReturn from "./components/apartment/vnpayReturn/VnpayReturn";
 
 const routers = [
   {
@@ -25,6 +27,16 @@ const routers = [
     path: "/personal/:username",
     exact: true,
     main: ({ history }) => <PersonalPage history={history} />,
+  },
+  {
+    path: "/apartment",
+    exact: true,
+    main: ({ history }) => <ApartmentPage history={history} />,
+  },
+  {
+    path: "/vnpay_return",
+    exact: true,
+    main: ({ history }) => <VnpayReturn history={history} />,
   },
   {
     path: "",

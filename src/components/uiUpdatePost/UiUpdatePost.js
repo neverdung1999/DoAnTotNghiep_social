@@ -3,7 +3,7 @@ import "./uiUpdatePost.css";
 import UiAddNews from "../uiAddNews/UiAddNews";
 
 function UiUpdatePost(props) {
-  const { dataDetailPost } = props;
+  const { dataDetailPost, setOpenUiUpdatePost } = props;
   const [openFromAddNews, setOpenFormAddNews] = useState(false);
 
   const onCloseForm = () => {
@@ -21,6 +21,8 @@ function UiUpdatePost(props) {
         openFromAddNews={openFromAddNews}
         onCloseForm={onCloseForm}
         dataDetailPost={dataDetailPost}
+        setOpenFormAddNews={setOpenFormAddNews}
+        setOpenUiUpdatePost={setOpenUiUpdatePost}
       />
       <div className="backgroundUpdatePost">
         <div className="backgroundUpdatePost_form">
@@ -47,5 +49,6 @@ function UiUpdatePost(props) {
     </div>
   );
 }
+
 
 export default UiUpdatePost;

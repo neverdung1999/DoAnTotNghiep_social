@@ -87,7 +87,7 @@ function UiContentFollow(props) {
                     <div className="bottom_left-title">
                       <Link
                         to={{
-                          pathname: `/personal/${dataFollow[index]?.username}`,
+                          pathname: `${dataFollow[index]?.username}`,
                           state: value,
                         }}
                         className="link_custom"
@@ -95,7 +95,7 @@ function UiContentFollow(props) {
                       >
                         <div
                           className="left_title-top"
-                          onClick={ () => handleChangeUser(value)}
+                          onClick={() => handleChangeUser(value)}
                         >
                           <p>{value?.username}</p>
                         </div>
@@ -104,28 +104,32 @@ function UiContentFollow(props) {
                       <div className="left_title-bottom">
                         <p>{value?.name}</p>
                       </div>
-                      {showLoading && idChoose === value?.id_account && <CircularProgress
-                        color="#f26e41"
-                        direction="bottom"
-                        percent={100}
-                        percentColor="#0095ff"
-                        size="extraSmall"
-                        strokeWidth={10}
-                        style={{
-                          position: "absolute",
-                          top: 15,
-                          right: 0,
-                          fontSize: 10,
-                          zIndex: 10000,
-                        }}
-                      />}
+                      {showLoading && idChoose === value?.id_account && (
+                        <CircularProgress
+                          color="#f26e41"
+                          direction="bottom"
+                          percent={100}
+                          percentColor="#0095ff"
+                          size="extraSmall"
+                          strokeWidth={10}
+                          style={{
+                            position: "absolute",
+                            top: 15,
+                            right: 0,
+                            fontSize: 10,
+                            zIndex: 10000,
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="form_bottom-right">
                     {checkFollowTemp !== -1 ? (
                       <p
                         id="bottom_right-delete"
-                        onClick={!showLoading ? () => openFormUnfollow(value) : null}
+                        onClick={
+                          !showLoading ? () => openFormUnfollow(value) : null
+                        }
                       >
                         Đang theo dõi
                       </p>
@@ -133,7 +137,9 @@ function UiContentFollow(props) {
                       value.username !== userCookies && (
                         <p
                           id="bottom_right-delete"
-                          onClick={!showLoading ? () => handleFollow(value) : null}
+                          onClick={
+                            !showLoading ? () => handleFollow(value) : null
+                          }
                           style={{
                             backgroundColor: "rgb(0, 149, 246)",
                             color: "white",

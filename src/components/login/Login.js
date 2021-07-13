@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import "./login.css";
 import Cookies from "universal-cookie";
@@ -27,7 +28,7 @@ function Login(props) {
       setMessageIncorrect(messageLogin.messageIncorrect);
       setIsLogin(false);
     }
-  });
+  }, [cookies, history, messageLogin.messageIncorrect]);
 
   const openFormRegister = () => {
     setOpenUiRegister(true);
@@ -81,6 +82,8 @@ function Login(props) {
       messagePassword === ""
     ) {
       setShowLoading(true);
+      console.log(valueInputEmail);
+      console.log(valueInputPassword);
       loginUserRequest(
         valueInputEmail,
         valueInputPassword,

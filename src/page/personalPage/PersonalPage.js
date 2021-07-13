@@ -3,6 +3,7 @@ import Personal from "../../components/personal/Personal";
 
 function PersonalPage(props) {
   const { history } = props;
+  console.log(history);
   return (
     <div>
       <Personal history={history} />
