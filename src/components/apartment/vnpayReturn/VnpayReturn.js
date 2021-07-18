@@ -35,7 +35,7 @@ function VnpayReturn(props) {
         <div className="backgroundVnpayReturn_form">
           <div className="backgroundVnpayReturn_form-top">
             <div className="formVnpayReturn_top-top">
-              <i class="fas fa-check-circle"></i>
+              <i className="fas fa-check-circle"></i>
             </div>
             <div className="formVnpayReturn_top-bottom">
               Thanh toán thành công

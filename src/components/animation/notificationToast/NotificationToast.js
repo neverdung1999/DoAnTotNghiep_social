@@ -50,6 +50,7 @@ function NotificationToast(props) {
         <DetailsPost
           dataDetailsPost={dataDetailsPost}
           onCloseForm={onCloseForm}
+          setOpenDetailsPost={setOpenDetailsPost}
         />
       )}
       <div className="backgroundNotiToast">

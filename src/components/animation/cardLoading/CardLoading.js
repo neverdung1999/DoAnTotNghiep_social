@@ -10,7 +10,12 @@ function CardLoading(props) {
       return (
         <Placeholder
           fluid
-          style={{ border: "20px solid white", borderRadius: 10 }}
+          style={{
+            border: "20px solid white",
+            borderRadius: 10,
+            width: 620,
+            marginLeft: 40,
+          }}
         >
           <Placeholder.Header
             image

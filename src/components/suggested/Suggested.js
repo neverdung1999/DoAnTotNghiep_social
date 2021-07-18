@@ -3,26 +3,25 @@ import "./suggested.css";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import * as actions from "../../redux/actions/Index";
-import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import { CircularProgress } from "diginet-core-ui/components";
 
 function Suggested(props) {
-  const { dataSuggested } = props;
+  const { dataSuggested, dataPersonal } = props;
+  const [idChoose, setIdChoose] = useState("");
   const [showLoading, setShowLoading] = useState(false);
-  const [isRender, setIsRender] = useState(true);
 
   useEffect(() => {
-    isRender && props.suggestedAccountRequest();
-    setIsRender(false);
-  }, [props, dataSuggested, isRender]);
+    dataPersonal?.following?.findIndex((value) => console.log(value));
+  });
 
   const handleFollow = (e) => {
     setShowLoading(true);
+    setIdChoose(e.id);
     props.followFriendRequest(e.id, setShowLoading);
   };
 
   return (
     <div>
-      {showLoading && <GlobalLoading />}
       {dataSuggested.map((value, index) => {
         return (
           <div className="right-bottom-bottom" key={index}>
@@ -41,6 +40,23 @@ function Suggested(props) {
               <p id="follow-sugges" onClick={() => handleFollow(value)}>
                 Theo dõi
               </p>
+              {showLoading && idChoose === value?.id && (
+                <CircularProgress
+                  color="#f26e41"
+                  direction="bottom"
+                  percent={100}
+                  percentColor="#0095ff"
+                  size="extraSmall"
+                  strokeWidth={10}
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -30,
+                    fontSize: 10,
+                    zIndex: 10000,
+                  }}
+                />
+              )}
             </div>
           </div>
         );
@@ -52,13 +68,14 @@ function Suggested(props) {
 const mapStateToProps = (state) => {
   return {
     dataSuggested: state.Home,
+    dataPersonal: state.MyPersonal,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    suggestedAccountRequest: () => {
-      dispatch(actions.suggestedAccountRequest());
+    suggestedAccountRequest: (id) => {
+      dispatch(actions.suggestedAccountRequest(id));
     },
     followFriendRequest: (id, setShowLoading) => {
       dispatch(actions.followFriendRequest(id, setShowLoading));

@@ -14,12 +14,19 @@ import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Header(props) {
-  const { logoutUser, data, idNotification, dataUser, dataAllUser } = props;
+  const {
+    logoutUser,
+    data,
+    idNotification,
+    dataUser,
+    dataAllUser,
+    dataPersonal,
+  } = props;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
   const history = useHistory();
-  const dataCookies = cookies?.get("data");
   const username = cookies?.get("username");
+  const imageCookies = cookies.get("imageSrc");
   const [isOpenNoti, setIsOpenNoti] = useState(false);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
@@ -46,8 +53,8 @@ function Header(props) {
   };
 
   const signOut = () => {
-    props.logOutRequest(cookies?.get("user"));
-    logoutUser();
+    props.logOutRequest(cookies?.get("user"), setIsOpenHeader);
+    // logoutUser();
   };
 
   const handleChangeUser = () => {
@@ -148,7 +155,7 @@ function Header(props) {
             </a>
 
             <div className="dropdown-avt" onClick={() => openFormDropDown()}>
-              <img src={dataCookies?.imageSrc} alt="" id="avt" />
+              <img src={imageCookies} alt="" id="avt" />
               <div
                 className="backgrounDropdown"
                 style={isOpenForm ? { display: "block" } : { display: "none" }}
@@ -157,7 +164,7 @@ function Header(props) {
                   <Link
                     to={{
                       pathname: `/personal/${username}`,
-                      state: dataCookies,
+                      state: dataPersonal,
                     }}
                     id="content-dropdown"
                     onClick={() => handleChangeUser()}
@@ -189,6 +196,7 @@ const mapStateToProps = (state) => {
   return {
     dataUser: state.Post,
     dataAllUser: state.User.dataAllUser,
+    dataPersonal: state.Personal,
   };
 };
 
@@ -200,8 +208,8 @@ const mapDispatchToProps = (dispatch) => {
     personalRequest: (setShowLoading, username) => {
       dispatch(Actions.personalRequest(setShowLoading, username));
     },
-    logOutRequest: (id) => {
-      dispatch(Actions.logOutRequest(id));
+    logOutRequest: (id, setIsOpenHeader) => {
+      dispatch(Actions.logOutRequest(id, setIsOpenHeader));
     },
     getAllUserRequest: () => {
       dispatch(Actions.getAllUserRequest());

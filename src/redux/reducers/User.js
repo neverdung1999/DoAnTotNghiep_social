@@ -27,9 +27,9 @@ const authen = (state = initialState, action) => {
         state.login.messageIncorrect = "Sai thông tin tài khoản hoặc mật khẩu!";
       }
       if (data.id) {
-        cookies.set("data", data);
-        cookies.set("user", data.id);
-        cookies.set("username", data.username);
+        cookies.set("imageSrc", data?.imageSrc);
+        cookies.set("user", data?.id);
+        cookies.set("username", data?.username);
         state.dataUser.data = data;
       }
       return state;
@@ -64,7 +64,22 @@ const authen = (state = initialState, action) => {
     case Types.LOGOUT_USER:
       cookies.remove("user");
       cookies.remove("username");
-      cookies.remove("data");
+      cookies.remove("imageSrc");
+      action.setIsOpenHeader(false);
+      state = {
+        dataUser: {
+          data: null,
+        },
+        login: {
+          messageIncorrect: "",
+        },
+        register: {
+          messageUsernameAlready: "",
+          messageEmailAlready: "",
+          messageEmailUsernameAlready: "",
+        },
+        dataAllUser: [],
+      };
       return state;
     case Types.ALL_USER:
       const dataAllUser = action.data;

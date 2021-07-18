@@ -1,4 +1,5 @@
 import axios from "axios";
+
 const PROJECT_ID = "SKlS4RX8A62Wm4X6iJ5FEevuPGmuabInjK";
 const PROJECT_SECRET = "MVFsRUIzelg0MFVuSVlUcmFPVXNSZDBONWpBVDZjcg==";
 const BASE_URL = "https://api.stringee.com/v1/room2";
@@ -24,6 +25,7 @@ class API {
     );
 
     const room = response.data;
+    console.log({ room });
     return room;
   }
 
@@ -33,6 +35,7 @@ class API {
     });
 
     const rooms = response.data.list;
+    console.log({ rooms });
     return rooms;
   }
 
@@ -46,6 +49,8 @@ class API {
         headers: this._authHeader(),
       }
     );
+
+    console.log({ response });
 
     return response.data;
   }
@@ -92,6 +97,7 @@ class API {
     );
 
     const tokens = response.data;
+    console.log({ tokens });
     return tokens;
   }
 

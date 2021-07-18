@@ -2,22 +2,25 @@ import * as Types from "../constants/ActionTypes";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
-let initalState = [];
+let initialState = [];
 
-const Personal = (state = initalState, action) => {
+const MyUser = (state = initialState, action) => {
   switch (action.type) {
-    case Types.PERSONAL_USER:
-      const data = action.data.data;
+    case Types.GET_MY_PERSONAL:
+      const data = action.data;
       if (data.id === cookies.get("user")) {
         cookies.set("data", data);
         cookies.set("username", data?.username);
       }
       state = data;
-      action.setShowLoading(false);
+      return state;
+    case Types.PERSONAL_USER_BY_ID:
+      const dataById = action.data.data;
+      state = dataById;
       return state;
     default:
       return state;
   }
 };
 
-export default Personal;
+export default MyUser;

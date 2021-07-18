@@ -6,7 +6,6 @@ export const PERSONAL_USER_BY_ID = "PERSONAL_USER_BY_ID";
 export const LOGOUT_USER = "LOGOUT_USER";
 export const REMOVE_STATE = "REMOVE_STATE";
 export const CHANGE_AVT = "CHANGE_AVT";
-export const MY_USER = "MY_USER";
 export const SUGGESTED_ACCOUNTS = "SUGGESTED_ACCOUNTS";
 export const POST_NEW = "POST_NEW";
 export const GET_POST = "GET_POST";
@@ -16,6 +15,9 @@ export const GET_DETAILS_POST_COMMENT = "GET_DETAILS_POST_COMMENT";
 export const GET_DETAILS_POST_INDEX = "GET_DETAILS_POST_INDEX";
 export const GET_ALL_USER = "GET_ALL_USER";
 export const ALL_USER = "ALL_USER";
+export const VALUE_TOAST = "VALUE_TOAST";
+export const GET_MY_PERSONAL = "GET_MY_PERSONAL";
+
 // ------------------------ APARTMENT ------------------------------
 export const GET_BILL = "GET_BILL";
 export const GET_COST = "GET_COST";

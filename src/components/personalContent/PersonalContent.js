@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./personalContent.css";
 import _ from "lodash";
 import { pure } from "recompose";
 import { connect } from "react-redux";
 import DetailsPost from "../detailsPost/DetailsPost";
 import * as actions from "../../redux/actions/Index";
-import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 
 function PersonalContent(props) {
-  const { dataPost, idDataUserApi, getPostRequestById } = props;
-  const [showLoading, setShowLoading] = useState(true);
+  const { dataPost } = props;
   const [openDetailsPost, setOpenDetailsPost] = useState(false);
   const [dataDetailsPost, setDataDetailsPost] = useState(null);
-
-  useEffect(() => {
-    setShowLoading(true);
-    if (idDataUserApi !== undefined) {
-      getPostRequestById(setShowLoading, idDataUserApi);
-    }
-  }, [getPostRequestById, idDataUserApi]);
+  const [openToast, setOpenToast] = useState(false);
+  const [valueToast, setValueToast] = useState({
+    text: null,
+  });
 
   const handleChoosePost = (data) => {
     setOpenDetailsPost(true);
@@ -36,9 +32,22 @@ function PersonalContent(props) {
           dataDetailsPost={dataDetailsPost}
           onCloseForm={onCloseForm}
           typePost="postById"
+          setOpenDetailsPost={setOpenDetailsPost}
+          setOpenToast={setOpenToast}
+          setValueToast={setValueToast}
         />
       )}
-      {showLoading && <GlobalLoading />}
+      <div
+        style={{
+          width: 150,
+          position: "fixed",
+          bottom: 70,
+          left: 50,
+        }}
+      >
+        {openToast && <SnackbarContent message={valueToast?.text} />}
+      </div>
+      {/* {showLoading && <GlobalLoading />} */}
       <div className="bodyContainer_bottom">
         {_.orderBy(dataPost, ["timestamp"], ["desc"])?.map((item, index) => {
           return (

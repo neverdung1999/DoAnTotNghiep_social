@@ -26,7 +26,7 @@ function UiContentFollow(props) {
 
   const handleChangeUser = (value) => {
     setShowLoading(true);
-    props.personalRequest(setShowLoading, value?.username);
+    props.getPersonalByMeRequest(setShowLoading, value?.username);
   };
 
   const openFormUnfollow = (value) => {
@@ -87,7 +87,7 @@ function UiContentFollow(props) {
                     <div className="bottom_left-title">
                       <Link
                         to={{
-                          pathname: `${dataFollow[index]?.username}`,
+                          pathname: `/personal/${dataFollow[index]?.username}`,
                           state: value,
                         }}
                         className="link_custom"
@@ -164,14 +164,14 @@ function UiContentFollow(props) {
 
 const mapStateToProps = (state) => {
   return {
-    dataUser: state.Personal,
+    dataUser: state.MyPersonal,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    personalRequest: (setShowLoading, username) => {
-      dispatch(Action.personalRequest(setShowLoading, username));
+    getPersonalByMeRequest: (setShowLoading, username) => {
+      dispatch(Action.getPersonalByMeRequest(setShowLoading, username));
     },
     followFriendRequest: (id, setShowLoading, username) => {
       dispatch(Action.followFriendRequest(id, setShowLoading, username));

@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./uiGroupChat.css";
-import Cookies from "universal-cookie";
 import _ from "lodash";
 import { db } from "../../services/firebase";
 
 function UiGroupChat(props) {
-  const { openGroupChat } = props;
-  const cookies = new Cookies();
-  const dataCookies = cookies.get("data");
+  const { openGroupChat, dataUser } = props;
   const [arrItemChoose, setArrItemChoose] = useState([]);
   const [arrDataItemChoose, setArrDataItemChoose] = useState([]);
 
@@ -38,7 +35,7 @@ function UiGroupChat(props) {
 
   const onCreateChat = async () => {
     let arrDateChooseTemp = [];
-    dataCookies?.following.forEach((e) => {
+    dataUser?.following.forEach((e) => {
       if (arrItemChoose.length === 1) {
         if (e.id_account === arrItemChoose[0]) {
           arrDateChooseTemp.push(e);
@@ -68,13 +65,13 @@ function UiGroupChat(props) {
       objectTemp2[objectTemp1.id] = objectTemp1;
       objectTempUsername.push(e.username);
     });
-    objectTemp2[dataCookies.id] = {
-      name: dataCookies.name,
-      id: dataCookies.id,
-      username: dataCookies.username,
-      imageSrc: dataCookies.imageSrc,
+    objectTemp2[dataUser.id] = {
+      name: dataUser.name,
+      id: dataUser.id,
+      username: dataUser.username,
+      imageSrc: dataUser.imageSrc,
     };
-    objectTempUsername.push(dataCookies.username);
+    objectTempUsername.push(dataUser.username);
 
     const getKey = (await db.ref("chat_info").push()).getKey();
     await db.ref(`chat_info/${getKey}`).set({
@@ -88,9 +85,9 @@ function UiGroupChat(props) {
 
     await db.ref(`chat_messages/${getKey}`).push({
       content: "",
-      idUser: dataCookies?.id,
-      name: dataCookies?.name,
-      username: dataCookies?.username,
+      idUser: dataUser?.id,
+      name: dataUser?.name,
+      username: dataUser?.username,
       time: Date.now(),
     });
   };
@@ -123,7 +120,7 @@ function UiGroupChat(props) {
             <div className="formGroupChat_wrapper">
               {/* ----------------------------------- item ----------------------------------- */}
 
-              {dataCookies?.following?.map((item, index) => {
+              {dataUser?.following?.map((item, index) => {
                 return (
                   <div
                     key={index}

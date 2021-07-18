@@ -104,7 +104,7 @@ function Login(props) {
             </div>
             <div className="containerContent_left-title">
               <h3 id="containerContent_left-title">
-                Instagram giúp bạn kết nối và chia sẻ với mọi người trong cuộc
+                DTOnstagram giúp bạn kết nối và chia sẻ với mọi người trong cuộc
                 sống của bạn.
               </h3>
             </div>

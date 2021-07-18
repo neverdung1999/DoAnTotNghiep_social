@@ -1,24 +1,29 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {  useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./index.css";
 import Post from "../post/Post";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
 import Suggested from "../suggested/Suggested";
+import * as actions from "../../redux/actions/Index";
 
 function Index(props) {
-  const { history } = props;
+  const { history, dataUser } = props;
   const cookies = new Cookies();
-  const dataCookies = cookies.get("data");
   const userCookies = cookies.get("username");
+  const imageCookies = cookies.get("imageSrc");
+  const [isRender, setIsRender] = useState(true);
+  const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
     if (!cookies.get("user")) {
       history.push("/login");
     }
-  }, [cookies, history, props, userCookies]);
+    isRender && props.personalRequest(setShowLoading, userCookies);
+    setIsRender(false);
+  }, [cookies, history, props, userCookies, isRender]);
 
   return (
     <div>
@@ -32,21 +37,21 @@ function Index(props) {
                   <Link
                     to={{
                       pathname: `/personal/${userCookies}`,
-                      state: dataCookies,
+                      state: dataUser,
                     }}
                   >
-                    <img src={dataCookies?.imageSrc} alt="" id="avt-right" />
+                    <img src={imageCookies} alt="" id="avt-right" />
                   </Link>
                 </div>
                 <div className="p-avt-right">
                   <Link
                     to={{
                       pathname: `/personal/${userCookies}`,
-                      state: dataCookies,
+                      state: dataUser,
                     }}
                     id="p-avt-right"
                   >
-                    <p>{dataCookies?.username}</p>
+                    <p>{userCookies}</p>
                   </Link>
                 </div>
               </div>
@@ -56,7 +61,7 @@ function Index(props) {
                     <span id="suggestion">Gợi ý cho bạn</span>
                   </div>
                   <div className="watch-all">
-                    <a href="#" id="watch-all">
+                    <a href="#" id="watch-all" style={{ display: "none" }}>
                       {" "}
                       <p>Xem tất cả</p>
                     </a>
@@ -76,7 +81,16 @@ const mapStateToProps = (state) => {
   return {
     isLogin: state.User.dataUser,
     dataAllUser: state.User.dataAllUser,
+    dataUser: state.Personal,
   };
 };
 
-export default connect(mapStateToProps)(Index);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    personalRequest: (setShowLoading, username) => {
+      dispatch(actions.personalRequest(setShowLoading, username));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Index);

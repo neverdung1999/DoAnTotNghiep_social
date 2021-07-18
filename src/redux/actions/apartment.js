@@ -32,7 +32,6 @@ export const getCostRequest = () => {
   return async (dispatch) => {
     try {
       const response = await CallApi("GET", "/apt/getCost", null);
-      // dispatch(getBill(response?.data));
     } catch (error) {
       console.log(error);
     }
@@ -60,7 +59,6 @@ export const getPostApartment = (data) => {
 export const createPaymentRequest = (id, tongTien) => {
   return async (dispatch) => {
     try {
-      console.log(id, tongTien);
       const response = await CallApi("POST", "/create_payment_url", {
         id: id,
         orderType: "billpayment",

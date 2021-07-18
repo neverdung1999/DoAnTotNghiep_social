@@ -9,6 +9,7 @@ import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
 import TimeStamp from "../../timeStamp";
 import { Slide } from "react-slideshow-image";
+import ReactHtmlParser from "react-html-parser";
 import * as actions from "../../redux/actions/Index";
 import DetailsPost from "../detailsPost/DetailsPost";
 import CardLoading from "../animation/cardLoading/CardLoading";
@@ -20,13 +21,13 @@ function Post(props) {
   const idCookies = cookies.get("user");
   const [idPost, setIdPost] = useState("");
   const [content, setContent] = useState("");
+  const [likePost, setLikePost] = useState([]);
   const [isRender, setIsRender] = useState(true);
   const [showLoading, setShowLoading] = useState(true);
   const [dataNewsPost, setDataNewsPost] = useState(null);
   const [dataDetailsPost, setDataDetailsPost] = useState(null);
+  const [openDetailsPost, setOpenDetailsPost] = useState(false);
   const [showLoadingComment, setShowLoadingComment] = useState(false);
-  const [openDataDetailsPost, setOpenDataDetailsPost] = useState(false);
-  const [likePost, setLikePost] = useState([]);
 
   useEffect(() => {
     if (idCookies) isRender && props.getPostRequest(setShowLoading, idCookies);
@@ -47,11 +48,11 @@ function Post(props) {
 
   const handleClickChoosePost = (data) => {
     setDataDetailsPost(data);
-    setOpenDataDetailsPost(true);
+    setOpenDetailsPost(true);
   };
 
   const onCloseForm = (e) => {
-    setOpenDataDetailsPost(e);
+    setOpenDetailsPost(e);
   };
 
   const handleChange = (e, idPost) => {
@@ -88,11 +89,12 @@ function Post(props) {
 
   return (
     <div>
-      {openDataDetailsPost && (
+      {openDetailsPost && (
         <DetailsPost
           dataDetailsPost={dataDetailsPost}
           onCloseForm={onCloseForm}
           typePost="allPost"
+          setOpenDetailsPost={setOpenDetailsPost}
         />
       )}
       {showLoading && (
@@ -106,11 +108,12 @@ function Post(props) {
           style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
         />
       )}
+      {/* {showLoading && <GlobalLoading />} */}
+      {showLoading && <CardLoading actionTypes="post" />}
 
-      <div className="backgroundItem">
-        {showLoading && <CardLoading actionTypes="post" />}
+      <div id="scrollableDiv" className="backgroundItem">
         {!showLoading &&
-          dataNewsPost?.map((item, index) => {
+          _.orderBy(dataPost, "timestamp", "desc")?.map((item, index) => {
             return (
               <div key={index} className="backgroundItem_form">
                 <div className="backgroundItem_form-top">
@@ -177,7 +180,10 @@ function Post(props) {
                         }
                         style={
                           likePost.includes(item.id_post)
-                            ? { fontWeight: "bold", color: "rgb(237, 73, 86)" }
+                            ? {
+                                fontWeight: "bold",
+                                color: "rgb(237, 73, 86)",
+                              }
                             : null
                         }
                       ></i>
@@ -199,7 +205,7 @@ function Post(props) {
                     <div className="bottomItem_top-body">
                       <p id="bottomItem_top-body">
                         <b>{item?.username}</b>
-                        {item?.content}
+                        {ReactHtmlParser(item?.content)}
                       </p>
                     </div>
                     <div className="bottomItem_top-bottom">

@@ -15,12 +15,11 @@ import FaceTime from "../faceTime/FaceTime";
 let arrImg = [];
 
 function Chat(props) {
-  const { history, personalRequest } = props;
+  const { history, personalRequest, dataUser, dataUserApi } = props;
   const arrTemp = useRef([]);
   const cookies = new Cookies();
   const [chat, setChat] = useState([]);
   const idUser = cookies.get("user");
-  const dataCookies = cookies.get("data");
   const [roomId, setRoomId] = useState("");
   const username = cookies.get("username");
   const [content, setContent] = useState("");
@@ -40,133 +39,133 @@ function Chat(props) {
   const [openFaceTime, setOpenFaceTime] = useState(false);
 
   useEffect(() => {
-    let roomIdTemp = "";
+    if (_.isEmpty(dataUserApi?.dataAllUser)) {
+      history.push("/login");
+    } else {
+      let roomIdTemp = "";
 
-    //------------------------- PUSH DATA FROM HISTORY -------------------------
+      //------------------------- PUSH DATA FROM HISTORY -------------------------
 
-    const stateHistory = history?.location?.state;
-    if (stateHistory !== undefined) {
-      dataHistory !== "" && setDataHistory(stateHistory);
-      colorHistory !== "" && setColorHistory(stateHistory.id);
-      dataHistory && setDataUserChoose(dataHistory);
-      colorHistory && setColorChoose(colorHistory);
-    }
+      const stateHistory = history?.location?.state;
+      if (stateHistory !== undefined) {
+        dataHistory !== "" && setDataHistory(stateHistory);
+        colorHistory !== "" && setColorHistory(stateHistory.id);
+        dataHistory && setDataUserChoose(dataHistory);
+        colorHistory && setColorChoose(colorHistory);
+      }
 
-    //------------------------- END PUSH DATA FROM HISTORY -------------------------
+      //------------------------- END PUSH DATA FROM HISTORY -------------------------
 
-    //------------------------- CREATE CONTENTID -------------------------
+      //------------------------- CREATE CONTENTID -------------------------
 
-    let objectTemp1 = {
-      name: dataCookies?.name,
-      imageSrc: dataCookies?.imageSrc,
-      id: dataCookies?.id,
-      username: dataCookies?.username,
-    };
-    let objectTemp2 = {
-      name: dataUserChoose?.name,
-      imageSrc: dataUserChoose?.imageSrc,
-      id: dataUserChoose?.id,
-      username: dataUserChoose?.username,
-    };
-    let objectTemp3 = {};
-    objectTemp3[idUser] = objectTemp1;
-    objectTemp3[dataUserChoose?.id] = objectTemp2;
-    setArrContainId(objectTemp3);
+      let objectTemp1 = {
+        name: dataUser?.name,
+        imageSrc: dataUser?.imageSrc,
+        id: dataUser?.id,
+        username: dataUser?.username,
+      };
+      let objectTemp2 = {
+        name: dataUserChoose?.name,
+        imageSrc: dataUserChoose?.imageSrc,
+        id: dataUserChoose?.id,
+        username: dataUserChoose?.username,
+      };
+      let objectTemp3 = {};
+      objectTemp3[idUser] = objectTemp1;
+      objectTemp3[dataUserChoose?.id] = objectTemp2;
+      setArrContainId(objectTemp3);
 
-    //------------------------- END CREATE CONTENTID -------------------------
+      //------------------------- END CREATE CONTENTID -------------------------
 
-    const arrConcat = arrTemp?.current.concat(stateHistory);
-    stateHistory ? setDataFriend(arrConcat) : setDataFriend(arrTemp?.current);
+      const arrConcat = arrTemp?.current.concat(stateHistory);
+      stateHistory ? setDataFriend(arrConcat) : setDataFriend(arrTemp?.current);
 
-    try {
-      isRender && personalRequest(setShowLoading, username);
-      setIsRender(false);
+      try {
+        isRender && personalRequest(setShowLoading, username);
+        setIsRender(false);
 
-      const getDataChatRequest = async () => {
-        let data = {};
-        let arrTemp = [];
-        await db
-          .ref()
-          .child("chat_info")
-          .orderByChild(`containId/${idUser}/id`)
-          .equalTo(idUser)
-          .on("value", (snapshot) => {
-            if (snapshot.val() !== null)
-              for (const [key, value] of Object.entries(snapshot.val())) {
-                if (_.size(value?.containId) === 2) {
-                  for (const [keyId, valueId] of Object.entries(
-                    value?.containId
-                  )) {
-                    if (valueId?.id !== idUser) {
-                      data = {
-                        ...valueId,
-                        idRoom: key,
-                        lastTime: value?.lastTime,
-                      };
-                      arrTemp.push(data);
+        const getDataChatRequest = async () => {
+          let data = {};
+          let arrTemp = [];
+          await db
+            .ref()
+            .child("chat_info")
+            .orderByChild(`containId/${idUser}/id`)
+            .equalTo(idUser)
+            .on("value", (snapshot) => {
+              if (snapshot.val() !== null)
+                for (const [key, value] of Object.entries(snapshot.val())) {
+                  if (_.size(value?.containId) === 2) {
+                    for (const [keyId, valueId] of Object.entries(
+                      value?.containId
+                    )) {
+                      if (valueId?.id !== idUser) {
+                        data = {
+                          ...valueId,
+                          idRoom: key,
+                          lastTime: value?.lastTime,
+                        };
+                        arrTemp.push(data);
 
-                      //check xem co stateHistory hay khong
-                      if (stateHistory !== undefined) {
-                        if (stateHistory?.id !== valueId?.id) {
-                          arrTemp.push(stateHistory);
+                        //check xem co stateHistory hay khong
+                        if (stateHistory !== undefined) {
+                          if (stateHistory?.id !== valueId?.id) {
+                            arrTemp.push(stateHistory);
+                          }
+                        }
+
+                        if (dataUserChoose !== null) {
+                          if (dataUserChoose?.id === valueId?.id) {
+                            roomIdTemp = value.idRoom;
+                            setRoomId(roomIdTemp);
+                          }
                         }
                       }
 
-                      if (dataUserChoose !== null) {
-                        if (dataUserChoose?.id === valueId?.id) {
-                          roomIdTemp = value.idRoom;
-                          setRoomId(roomIdTemp);
-                        }
-                      }
+                      setDataFriend(
+                        _.uniqWith(
+                          _.sortBy(arrTemp, ["lastTime"], ["desc"]),
+                          _.isEqual
+                        )
+                      );
                     }
-
-                    // console.log(arrTemp);
-
-                    // console.log(
-                    //   _.uniqWith(
-                    //     _.sortBy(arrTemp, ["lastTime"], ["desc"]),
-                    //     _.isEqual
-                    //   )
-                    // );
-
-                    setDataFriend(
-                      _.uniqWith(
-                        _.sortBy(arrTemp, ["lastTime"], ["desc"]),
-                        _.isEqual
-                      )
-                    );
-                  }
-                } else {
-                  arrTemp.push(value);
-                  setDataFriend(_.uniqWith(arrTemp, _.isEqual));
-                  if (dataUserChoose !== null) {
-                    if (dataUserChoose.idRoom === value.idRoom) {
-                      roomIdTemp = value.idRoom;
-                      setRoomId(roomIdTemp);
+                  } else {
+                    arrTemp.push(value);
+                    setDataFriend(_.uniqWith(arrTemp, _.isEqual));
+                    if (dataUserChoose !== null) {
+                      if (dataUserChoose.idRoom === value.idRoom) {
+                        roomIdTemp = value.idRoom;
+                        setRoomId(roomIdTemp);
+                      }
                     }
                   }
                 }
-              }
 
-            if (roomIdTemp !== "") {
-              db.ref("chat_messages/" + roomIdTemp).on("value", (snapshot) => {
-                const chatTemp = [];
-                if (snapshot.val() !== null)
-                  for (const [key, value] of Object.entries(snapshot.val())) {
-                    chatTemp.push(value);
+              if (roomIdTemp !== "") {
+                db.ref("chat_messages/" + roomIdTemp).on(
+                  "value",
+                  (snapshot) => {
+                    const chatTemp = [];
+                    if (snapshot.val() !== null)
+                      for (const [key, value] of Object.entries(
+                        snapshot.val()
+                      )) {
+                        chatTemp.push(value);
+                      }
+                    setChat(chatTemp);
                   }
-                setChat(chatTemp);
-              });
-            } else {
-              setChat([]);
-              setRoomId("");
-            }
-          });
-      };
+                );
+              } else {
+                setChat([]);
+                setRoomId("");
+              }
+            });
+        };
 
-      getDataChatRequest();
-    } catch (error) {
-      console.log(error);
+        getDataChatRequest();
+      } catch (error) {
+        console.log(error);
+      }
     }
   }, [
     colorHistory,
@@ -177,11 +176,13 @@ function Chat(props) {
     isRender,
     personalRequest,
     username,
-    dataCookies?.id,
-    dataCookies?.imageSrc,
-    dataCookies?.name,
-    dataCookies?.username,
+    dataUser?.id,
+    dataUser?.imageSrc,
+    dataUser?.name,
+    dataUser?.username,
     arrFriendNews,
+    dataUserApi?.dataAllUser,
+    history,
   ]);
 
   const handleChangeImg = (e) => {
@@ -237,11 +238,11 @@ function Chat(props) {
         content !== "" &&
           (await db.ref(`chat_messages/${roomId}`).push({
             content: content,
-            idUser: dataCookies?.id,
-            name: dataCookies?.name,
+            idUser: dataUser?.id,
+            name: dataUser?.name,
             image: imgChoose,
-            username: dataCookies?.username,
-            imageSender: dataCookies?.imageSrc,
+            username: dataUser?.username,
+            imageSender: dataUser?.imageSrc,
             time: Date.now(),
           }));
         content !== "" &&
@@ -263,11 +264,11 @@ function Chat(props) {
         content !== "" &&
           (await db.ref(`chat_messages/${getKey}`).push({
             content: content,
-            idUser: dataCookies?.id,
-            name: dataCookies?.name,
-            username: dataCookies?.username,
+            idUser: dataUser?.id,
+            name: dataUser?.name,
+            username: dataUser?.username,
             image: imgChoose,
-            imageSender: dataCookies?.imageSrc,
+            imageSender: dataUser?.imageSrc,
             time: Date.now(),
           }));
       }
@@ -310,20 +311,6 @@ function Chat(props) {
     console.log(e);
   };
 
-  // console.log(
-  //   _.uniqBy(dataFriend, "idRoom")?.filter((item) => item?.idRoom !== undefined)
-  // );
-
-  // console.log(
-  //   _.orderBy(
-  //     _.uniqBy(dataFriend, "idRoom")?.filter(
-  //       (item) => item?.idRoom !== undefined
-  //     ),
-  //     ["lastTime"],
-  //     ["desc"]
-  //   )
-  // );
-
   const handleOpenFacetime = (data) => {
     setDataCall(data);
     setOpenFaceTime(true);
@@ -337,6 +324,7 @@ function Chat(props) {
         openGroupChat={openGroupChat}
         onCloseForm={onCloseForm}
         arrDataItemChoose={arrDataItemChoose}
+        dataUser={dataUser}
       />
       <UiEditChat isOpenEditChat={isOpenEditChat} onCloseForm={onCloseForm} />
       <div className="contentChat">
@@ -580,6 +568,7 @@ function Chat(props) {
 const mapStateToProps = (state) => {
   return {
     dataUser: state.Personal,
+    dataUserApi: state.User,
   };
 };
 
@@ -587,9 +576,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     personalRequest: (setShowLoading, username) => {
       dispatch(actions.personalRequest(setShowLoading, username));
-    },
-    personalRequestById: (setShowLoading, id) => {
-      dispatch(actions.personalRequestById(setShowLoading, id));
     },
   };
 };

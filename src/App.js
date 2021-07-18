@@ -83,7 +83,7 @@ function App(props) {
       />
       <div className="clearfix"></div>
       <div
-        style={{ width: "100%", height: "100%", backgroundColor: "#f0f2f5" }}
+        style={{ width: "100%", height: "10000%", backgroundColor: "#f0f2f5" }}
       >
         <div className="container">{showContentComponents(routers)}</div>
       </div>

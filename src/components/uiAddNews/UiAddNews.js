@@ -16,6 +16,8 @@ function AddNews(props) {
     setOpenFormAddNews,
     dataDetailPost,
     setOpenUiUpdatePost,
+    setOpenToast,
+    setValueToast,
   } = props;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
@@ -97,7 +99,9 @@ function AddNews(props) {
             img,
             content,
             setShowLoading,
-            setOpenFormAddNews
+            setOpenFormAddNews,
+            setOpenToast,
+            setValueToast
           )
         : props.updatePostRequest(
             dataDetailPost?.id_post,
@@ -106,11 +110,22 @@ function AddNews(props) {
             setShowLoading,
             setOpenFormAddNews,
             setOpenUiUpdatePost,
-            idUser
+            idUser,
+            setOpenToast,
+            setValueToast
           );
       setContent("");
       setImg([]);
+      arrTemp = [];
     }
+  };
+
+  const handleRemoveImage = (image) => {
+    let arrImgClone = [...arrTemp];
+    const results = arrImgClone.findIndex((img) => img === image);
+    arrImgClone.splice(results, 1);
+    setImg(arrImgClone);
+    arrTemp = arrImgClone;
   };
 
   return (
@@ -145,7 +160,7 @@ function AddNews(props) {
         id={img.length !== 0 ? "largeForm" : "smallForm"}
       >
         <div className="backgroundAddfr_form-top">
-          Tạo bài viết
+          {dataDetailPost ? "Chỉnh sửa bài viết" : "Tạo bài viết"}
           <i
             className="fas fa-times"
             id="formAddfr_top-close"
@@ -191,6 +206,11 @@ function AddNews(props) {
                       style={{ maxWidth: "50%" }}
                     >
                       <img src={value} id="img_loading" alt="" />
+                      <i
+                        className="fas fa-times"
+                        id="remove_image"
+                        onClick={() => handleRemoveImage(value)}
+                      ></i>
                     </div>
                   );
                 })
@@ -199,7 +219,12 @@ function AddNews(props) {
                   className="img_loading-column"
                   style={{ maxWidth: "100%" }}
                 >
-                  <img src={img} id="img_loading" alt="" />
+                  <img src={img[0]} id="img_loading" alt="" />
+                  <i
+                    className="fas fa-times"
+                    id="remove_image"
+                    onClick={() => handleRemoveImage(img[0])}
+                  ></i>
                 </div>
               )}
             </div>
@@ -237,14 +262,24 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    postNewsRequest: (id, img, content, setShowLoading, setOpenFormAddNews) => {
+    postNewsRequest: (
+      id,
+      img,
+      content,
+      setShowLoading,
+      setOpenFormAddNews,
+      setOpenToast,
+      setValueToast
+    ) => {
       dispatch(
         actions.postNewRequest(
           id,
           img,
           content,
           setShowLoading,
-          setOpenFormAddNews
+          setOpenFormAddNews,
+          setOpenToast,
+          setValueToast
         )
       );
     },
@@ -255,7 +290,9 @@ const mapDispatchToProps = (dispatch) => {
       setShowLoading,
       setOpenFormAddNews,
       setOpenUiUpdatePost,
-      idUser
+      idUser,
+      setOpenToast,
+      setValueToast
     ) => {
       dispatch(
         actions.updatePostRequest(
@@ -265,7 +302,9 @@ const mapDispatchToProps = (dispatch) => {
           setShowLoading,
           setOpenFormAddNews,
           setOpenUiUpdatePost,
-          idUser
+          idUser,
+          setOpenToast,
+          setValueToast
         )
       );
     },

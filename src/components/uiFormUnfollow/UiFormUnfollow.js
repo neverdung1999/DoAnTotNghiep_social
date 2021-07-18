@@ -67,7 +67,7 @@ function UiFormUnfollow(props) {
 
 const mapStateToProps = (state) => {
   return {
-    dataUser: state.Personal,
+    dataUser: state.MyPersonal,
   };
 };
 

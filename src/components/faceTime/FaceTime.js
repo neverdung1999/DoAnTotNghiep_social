@@ -1,45 +1,145 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect, useRef } from "react";
 import "./faceTime.css";
-import Peer from "simple-peer";
-import io from "socket.io-client";
+import { api } from "./Api";
+// import { StringeeClient, StringeeVideo } from "stringee-chat-js-sdk";
 
 function FaceTime(props) {
-  const socket = io.connect("http://localhost:5000");
-  const [me, setMe] = useState("");
-  const [users, setUsers] = useState({});
-  const [stream, setStream] = useState();
-  const [receivingCall, setReceivingCall] = useState(false);
-  const [caller, setCaller] = useState("");
-  const [callerSignal, setCallerSignal] = useState();
-  const [callAccepted, setCallAccepted] = useState(false);
-
-  const myVideo = useRef();
-  const partnerVideo = useRef();
+  const { dataCall } = props;
+  const [roomToken, setRoomToken] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const videoContainer = document.querySelector("#videosHehe");
+  const clientTemp = useRef(undefined);
+  const roomTokenTemp = useRef(undefined);
+  const roomTemp = useRef(undefined);
+  const userTokenTemp = useRef("");
+  const videoTemp = useRef(null);
 
   useEffect(() => {
-    try {
-      const getUserMedia = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+    const mounted = async () => {
+      try {
+        await api.setRestToken();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    mounted();
+  }, []);
+
+  const authen = async () => {
+    return new Promise(async (resolve) => {
+      const userToken = await api.getUserToken("-McrpUu2wlCUJKRLh4MY");
+      userTokenTemp.current = userToken;
+
+      if (!clientTemp.current) {
+        const client = new StringeeClient();
+        client.on("authen", (results) => {
+          console.log("on authen: ", results);
+          resolve(results);
         });
-        myVideo.current.srcObject = stream;
-      };
-      getUserMedia();
-    } catch (error) {
-      console.log(error);
+
+        clientTemp.current = client;
+      }
+
+      clientTemp.current.connect(userToken);
+    });
+  };
+
+  const publishVideo = async () => {
+    const localTrack = await StringeeVideo.createLocalVideoTrack(
+      clientTemp.current,
+      {
+        video: true,
+        audio: true,
+        videoDimensions: { width: 640, height: 360 },
+      }
+    );
+
+    const videoElements = localTrack.attach();
+    await addVideo(videoElements);
+    // videoContainer?.appendChild(videoElements);
+
+    const roomData = await StringeeVideo.joinRoom(
+      clientTemp.current,
+      roomTokenTemp.current
+    );
+    const room = roomData.room;
+
+    if (!roomTemp.current) {
+      roomTemp.current = room;
+      room.clearAllOnMethos();
+      room.on("addtrack", async (event) => {
+        const trackInfo = event.info.track;
+
+        if (trackInfo.serverId === localTrack.serverId) return;
+
+        await subscribeTrack(trackInfo);
+      });
+
+      room.on("removetrack", async (event) => {
+        if (!event.track) return;
+        const elements = event.track.detach();
+        elements.forEach((element) => element.remove());
+      });
+
+      roomData?.listTrackInfo?.forEach(async (trackInfo) => {
+        await subscribeTrack(trackInfo);
+      });
     }
 
-    socket.on("yourID", (id) => {
-      console.log(id);
-      setMe(id);
-    });
-  }, []);
+    await room.publish(localTrack);
+    console.log("room publish successful");
+  };
+
+  const subscribeTrack = async (trackInfo) => {
+    if (trackInfo) {
+      const track = await roomTemp.current?.subscribe(trackInfo?.serverId);
+      track?.on("ready", async () => {
+        const ele = track.attach();
+        videoContainer.appendChild(ele);
+      });
+    }
+  };
+
+  const addVideo = async (video) => {
+    console.log(video);
+    video.setAttribute("controls", "true");
+    video.setAttribute("playsinline", "true");
+    await videoContainer.appendChild(video);
+  };
+
+  const createRoom = async () => {
+    const room = await api.createRoom();
+    const roomToken = await api.getRoomToken(room.roomId);
+
+    setRoomId(room.roomId);
+    setRoomToken(roomToken);
+    roomTokenTemp.current = roomToken;
+    await authen();
+    await publishVideo();
+  };
+
+  const joinRoom = async () => {
+    const roomId = prompt("Dán room vào đây");
+    if (!roomId) return;
+
+    const roomToken = await api.getRoomToken(roomId);
+    setRoomId(roomId);
+    setRoomToken(roomToken);
+    roomTokenTemp.current = roomToken;
+
+    await authen();
+    await publishVideo();
+  };
 
   return (
     <div>
       <div className="backgroundFaceTime">
-        <video ref={myVideo} autoPlay></video>
-        {/* <button onClick={() => callUser(me)}> Call User </button> */}
+        <h1>{roomId}</h1>
+        <h1>{roomToken}</h1>
+        <button onClick={() => createRoom()}>Create room</button>
+        <button onClick={() => joinRoom()}>Join room</button>
+        <div id="videosHehe"></div>
       </div>
     </div>
   );

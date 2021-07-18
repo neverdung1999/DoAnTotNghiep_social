@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import "./uiUpdatePost.css";
+import "../uiUpdatePost/uiUpdatePost.css";
 import { connect } from "react-redux";
-import * as actions from "../../redux/actions/Index";
 import UiAddNews from "../uiAddNews/UiAddNews";
+import * as actions from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
-function UiUpdatePost(props) {
+function UiUpdateComment(props) {
   const {
     dataDetailPost,
     setOpenUiUpdatePost,
-    setOpenDetailsPost,
-    setOpenToast,
-    setValueToast,
+    dataCommentPost,
+    setOpenUpdateCmt,
+    setOpenToastDetails,
+    setValueToastDetails,
   } = props;
   const [showLoading, setShowLoading] = useState(false);
   const [openFromAddNews, setOpenFormAddNews] = useState(false);
@@ -25,17 +26,17 @@ function UiUpdatePost(props) {
     setOpenFormAddNews(true);
   };
 
-  const deletePost = () => {
+  const removeComment = () => {
     setShowLoading(true);
-    console.log(dataDetailPost);
-    props.deletePostRequest(
+    props.removeCommentRequest(
       dataDetailPost?.id_post,
-      dataDetailPost?.id_account,
-      setOpenUiUpdatePost,
-      setOpenDetailsPost,
+      dataCommentPost?.id_account,
+      dataCommentPost?.id_comment,
+      dataCommentPost?.id_reply,
+      setOpenUpdateCmt,
       setShowLoading,
-      setOpenToast,
-      setValueToast
+      setOpenToastDetails,
+      setValueToastDetails
     );
   };
 
@@ -54,7 +55,7 @@ function UiUpdatePost(props) {
           <div
             className="backgroundUpdatePost_form-item"
             style={{ fontWeight: "bold", color: "red" }}
-            onClick={() => deletePost()}
+            onClick={() => removeComment()}
           >
             Xóa
           </div>
@@ -62,7 +63,7 @@ function UiUpdatePost(props) {
             className="backgroundUpdatePost_form-item"
             onClick={() => openEditPost()}
           >
-            Chỉnh sửa bài viết
+            Chỉnh sửa bình luận
           </div>
           <div
             className="backgroundUpdatePost_form-item"
@@ -78,28 +79,30 @@ function UiUpdatePost(props) {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    deletePostRequest: (
+    removeCommentRequest: (
       idPost,
       idAccount,
-      setOpenUiUpdatePost,
-      setOpenDetailsPost,
+      idComment,
+      idReply,
+      setOpenUpdateCmt,
       setShowLoading,
-      setOpenToast,
-      setValueToast
+      setOpenToastDetails,
+      setValueToastDetails
     ) => {
       dispatch(
-        actions.deletePostRequest(
+        actions.removeCommentRequest(
           idPost,
           idAccount,
-          setOpenUiUpdatePost,
-          setOpenDetailsPost,
+          idComment,
+          idReply,
+          setOpenUpdateCmt,
           setShowLoading,
-          setOpenToast,
-          setValueToast
+          setOpenToastDetails,
+          setValueToastDetails
         )
       );
     },
   };
 };
 
-export default connect(null, mapDispatchToProps)(UiUpdatePost);
+export default connect(null, mapDispatchToProps)(UiUpdateComment);

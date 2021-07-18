@@ -46,12 +46,12 @@ export const removeState = () => {
 
 // ------------------------------------------------------ END LOGIN USER ------------------------------------------------------
 
-export const logOutRequest = (id) => {
+export const logOutRequest = (id, setIsOpenHeader) => {
   return async (dispatch) => {
     try {
       const results = await CallApi("PUT", `/user/signIn?id=${id}`, null);
       if (results?.status >= 200 && results?.status < 300) {
-        dispatch(logoutUser());
+        dispatch(logoutUser(setIsOpenHeader));
       }
     } catch (error) {
       console.log(error);
@@ -59,9 +59,10 @@ export const logOutRequest = (id) => {
   };
 };
 
-export const logoutUser = () => {
+export const logoutUser = (setIsOpenHeader) => {
   return {
     type: Types.LOGOUT_USER,
+    setIsOpenHeader,
   };
 };
 
@@ -105,6 +106,28 @@ export const registerUser = (data, history) => {
 
 // ------------------------------------------------------  PERSONAL USER ------------------------------------------------------
 
+export const getPersonalByMeRequest = (setShowLoading, username) => {
+  return async (dispatch) => {
+    try {
+      const response = await CallApi("GET", `/user?username=${username}`, null);
+      // setShowLoading(false);
+      if (response?.status === 200) {
+        dispatch(getPersonalByMe(response?.data));
+        dispatch(getPostRequestById(setShowLoading, response?.data?.id));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const getPersonalByMe = (data) => {
+  return {
+    type: Types.GET_MY_PERSONAL,
+    data,
+  };
+};
+
 export const personalRequestById = (
   setShowLoading,
   id,
@@ -132,6 +155,7 @@ export const personalById = (data, setShowLoading) => {
 
 export const personalRequest = (setShowLoading, username) => {
   return (dispatch) => {
+    console.log(username);
     return CallApi("GET", `/user?username=${username}`, null)
       .then((response) => {
         setShowLoading(false);
@@ -156,22 +180,47 @@ export const personal = (data, setShowLoading) => {
 // ------------------------------------------------------ CHANGE AVT ------------------------------------------------------
 
 export const changeAvtRequest = (
-  idUser,
-  response,
+  reponseObject,
   setShowLoading,
-  username
+  username,
+  setValueToast,
+  setOpenToast,
+  setShowLoadingCirular
 ) => {
-  return (dispatch) => {
-    return CallApi("PUT", "/user", {
-      id: idUser,
-      imageSrc: response,
-    })
-      .then((res) => {
-        dispatch(personalRequest(setShowLoading, username));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  return async (dispatch) => {
+    try {
+      const response = await CallApi("PUT", "/user", reponseObject);
+      setOpenToast(true);
+      if (response?.data === "success") {
+        setValueToast &&
+          setValueToast({
+            text: "Cập nhật dữ liệu thành công",
+          });
+        dispatch(
+          getPersonalByMeRequest(
+            setShowLoading,
+            reponseObject?.username ? reponseObject?.username : username
+          )
+        );
+      } else {
+        setValueToast({
+          text: "Cập nhật dữ liệu thất bại",
+        });
+      }
+      setTimeout(() => {
+        setOpenToast(false);
+      }, 5000);
+      setShowLoadingCirular && setShowLoadingCirular(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const getValueToast = (setValueToast) => {
+  return {
+    type: Types.VALUE_TOAST,
+    setValueToast,
   };
 };
 
@@ -226,35 +275,12 @@ export const followFriendRequest = (id, setShowLoading, usernameFriend) => {
 
 // ------------------------------------------------------ END FOLLOW FRIEND ------------------------------------------------------
 
-// ------------------------------------------------------ GET MY USER ------------------------------------------------------
-
-export const getMyUserRequest = (setShowLoading) => {
-  return (dispatch) => {
-    return CallApi("GET", `/user?username=${username}`, null)
-      .then((response) => {
-        setShowLoading(false);
-        dispatch(getMyUser(response));
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-};
-
-export const getMyUser = (data) => {
-  return {
-    type: Types.MY_USER,
-    data,
-  };
-};
-
-// ------------------------------------------------------ END GET MY USER ------------------------------------------------------
-
 // ------------------------------------------------------ SUGGESTED USER ------------------------------------------------------
 
-export const suggestedAccountRequest = () => {
+export const suggestedAccountRequest = (id) => {
   return (dispatch) => {
-    return CallApi("GET", `/user/suggestedAccounts?id=${idUser}`, null).then(
+    console.log(id);
+    return CallApi("GET", `/user/suggestedAccounts?id=${id}`, null).then(
       (res) => {
         dispatch(suggestedAccounts(res));
       }
@@ -278,7 +304,9 @@ export const postNewRequest = (
   img,
   content,
   setShowLoading,
-  setOpenFormAddNews
+  setOpenFormAddNews,
+  setOpenToast,
+  setValueToast
 ) => {
   return (dispatch) => {
     return CallApi("POST", "/post", {
@@ -288,6 +316,11 @@ export const postNewRequest = (
     }).then((response) => {
       setOpenFormAddNews(false);
       if (response.data === "success") {
+        setOpenToast && setOpenToast(true);
+        setValueToast && setValueToast({ text: "Thêm bài viết thành công" });
+        setTimeout(() => {
+          setOpenToast && setOpenToast(false);
+        }, 6000);
         dispatch(getPostRequestById(setShowLoading, id));
       }
     });
@@ -319,7 +352,10 @@ export const getPostRequest = (setShowLoading, id) => {
     return CallApi("GET", `/post?id=${id}`)
       .then((res) => {
         setShowLoading && setShowLoading(false);
-        dispatch(getPost(res?.data));
+        if (res?.status === 200) {
+          dispatch(getPost(res?.data));
+          dispatch(suggestedAccountRequest(id));
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -339,9 +375,13 @@ export const getPost = (data) => {
 export const getPostRequestById = (setShowLoading, id) => {
   return async (dispatch) => {
     try {
+      console.log(id);
       const response = await CallApi("GET", `/post/byId?accountId=${id}`, null);
+      console.log(response);
       setShowLoading(false);
-      dispatch(getPostById(response?.data));
+      if (response?.status === 200) {
+        dispatch(getPostById(response?.data));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -409,7 +449,9 @@ export const updatePostRequest = (
   setShowLoading,
   setOpenFormAddNews,
   setOpenUiUpdatePost,
-  idUser
+  idUser,
+  setOpenToast,
+  setValueToast
 ) => {
   return async (dispatch) => {
     try {
@@ -421,6 +463,12 @@ export const updatePostRequest = (
       setOpenFormAddNews && setOpenFormAddNews(false);
       setOpenUiUpdatePost && setOpenUiUpdatePost(false);
       if (response.data === "success") {
+        setOpenToast && setOpenToast(true);
+        setValueToast &&
+          setValueToast({ text: "Cập nhật bài viết thành công" });
+        setTimeout(() => {
+          setOpenToast && setOpenToast(false);
+        }, 6000);
         dispatch(getPostRequest(setShowLoading, idUser));
       }
     } catch (error) {
@@ -573,5 +621,95 @@ export const getAllUser = (data) => {
   return {
     type: Types.ALL_USER,
     data,
+  };
+};
+
+// ------------------------------------------------------ EDIT PERSONAL_USER ------------------------------------------------------
+
+// ------------------------------------------------------ DELETE POST ------------------------------------------------------
+
+export const deletePostRequest = (
+  idPost,
+  idAccount,
+  setOpenUiUpdatePost,
+  setOpenDetailsPost,
+  setShowLoading,
+  setOpenToast,
+  setValueToast
+) => {
+  return async (dispatch) => {
+    try {
+      const response = await CallApi("DELETE", "/post", {
+        id_post: idPost,
+        id_account: idAccount,
+      });
+      setShowLoading && setShowLoading(false);
+      if (response?.status === 200) {
+        setOpenUiUpdatePost && setOpenUiUpdatePost(false);
+        setOpenDetailsPost && setOpenDetailsPost(false);
+        setOpenToast && setOpenToast(true);
+        setValueToast &&
+          setValueToast({
+            text: "Xóa bài viết thành công",
+          });
+        setTimeout(() => {
+          setOpenToast && setOpenToast(false);
+        }, 6000);
+        dispatch(getPostRequestById(setShowLoading, idAccount));
+      } else {
+        setTimeout(() => {
+          setValueToast &&
+            setValueToast({
+              text: "Xóa bài viết thất bại",
+            });
+        }, 6000);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+// ------------------------------------------------------ DELETE COMMENT POST ------------------------------------------------------
+
+export const removeCommentRequest = (
+  idPost,
+  idAccount,
+  idComment,
+  idReply,
+  setOpenUpdateCmt,
+  setShowLoading,
+  setOpenToastDetails,
+  setValueToastDetails
+) => {
+  return async () => {
+    const response = await CallApi("DELETE", "/post/comment", {
+      id_post: idPost,
+      id_account: idAccount,
+      id_comment: idComment,
+      id_reply: idReply,
+    });
+    console.log(response);
+    if (response?.status === 200) {
+      setShowLoading && setShowLoading(false);
+      setOpenUpdateCmt && setOpenUpdateCmt(false);
+      setOpenToastDetails && setOpenToastDetails(true);
+      setValueToastDetails &&
+        setValueToastDetails({ text: "Xóa bình luận thành công" });
+      setTimeout(() => {
+        setOpenToastDetails && setOpenToastDetails(false);
+      }, 6000);
+    } else {
+      setOpenToastDetails && setOpenToastDetails(true);
+      setValueToastDetails &&
+        setValueToastDetails({ text: "Xóa bình luận thất bại" });
+      setTimeout(() => {
+        setOpenToastDetails && setOpenToastDetails(false);
+      }, 6000);
+    }
+    try {
+    } catch (error) {
+      console.log(error);
+    }
   };
 };

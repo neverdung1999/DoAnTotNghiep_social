@@ -6,10 +6,12 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import AddNews from "../uiAddNews/UiAddNews";
 import ChangeAvt from "../changeAvt/ChangeAvt";
+import ReactHtmlParser from "react-html-parser";
 import * as Action from "../../redux/actions/Index";
 import { LinearProgress } from "diginet-core-ui/components";
 import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
 import UiEditPersonal from "../uiEditPersonal/UiEditPersonal";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 import UiContentFollow from "../uiContentFollow/UiContentFollow";
 import PersonalContent from "../personalContent/PersonalContent";
 
@@ -18,7 +20,6 @@ function Personal(props) {
   const cookies = new Cookies();
   const idUser = cookies.get("user");
   const username = cookies.get("username");
-  const dataCookies = cookies.get("data");
   const [isRender, setIsRender] = useState(true);
   const [dataUser, setDataUser] = useState(null);
   const [numberPost, setNumberPost] = useState(0);
@@ -32,53 +33,67 @@ function Personal(props) {
   const [openFormUnfollow, setOpenFormUnfollow] = useState(false);
   const [openEditPersonal, setOpenEditPersonal] = useState(false);
   const [openContentFollow, setOpenContentFollow] = useState(false);
+  const [openToast, setOpenToast] = useState(false);
+  const [valueToast, setValueToast] = useState({
+    text: null,
+  });
 
   useEffect(() => {
     if (!idUser) {
       history.push("/");
     } else {
-      if (history.location.state) {
-        isRender &&
-          props.personalRequest(
-            setShowLoading,
-            history.location.pathname.slice(10)
-          );
-        setIsRender(false);
-      } else {
-        if (isRender) {
-          getDataUrl && props.personalRequest(setShowLoading, getDataUrl);
-          setIsRender(false);
-        }
-      }
+      try {
+        const fetchDataPersonal = async () => {
+          if (history.location.state) {
+            isRender &&
+              (await props.getPersonalByMeRequest(
+                setShowLoading,
+                history.location.pathname.slice(10)
+              ));
+            setIsRender(false);
+          } else {
+            if (isRender) {
+              getDataUrl &&
+                (await props.getPersonalByMeRequest(
+                  setShowLoading,
+                  getDataUrl
+                ));
+              setIsRender(false);
+            }
+          }
 
-      let countPost = 0;
-      dataPost?.forEach((data) => {
-        if (data?.id_account === dataUserApi?.id) {
-          countPost += 1;
-        }
-      });
-      setNumberPost(countPost);
+          let countPost = 0;
+          dataPost?.forEach((data) => {
+            if (data?.id_account === dataUserApi?.id) {
+              countPost += 1;
+            }
+          });
+          setNumberPost(countPost);
 
-      setDataUser(dataUserApi);
+          setDataUser(dataUserApi);
 
-      if (!_.isEmpty(dataUserApi) && dataUserApi?.username !== username) {
-        if (!_.isEmpty(dataUserApi?.followers)) {
-          for (let i = 0; i < _.size(dataUserApi?.followers); i++) {
-            if (dataUserApi?.followers[i]?.username === username) {
-              setCheckUserFollow(1);
-              return;
+          if (!_.isEmpty(dataUserApi) && dataUserApi?.username !== username) {
+            if (!_.isEmpty(dataUserApi?.followers)) {
+              for (let i = 0; i < _.size(dataUserApi?.followers); i++) {
+                if (dataUserApi?.followers[i]?.username === username) {
+                  setCheckUserFollow(1);
+                  return;
+                } else {
+                  setCheckUserFollow(-1);
+                }
+              }
             } else {
               setCheckUserFollow(-1);
             }
           }
-        } else {
-          setCheckUserFollow(-1);
-        }
+        };
+        fetchDataPersonal();
+      } catch (error) {
+        console.log(error);
       }
     }
   }, [
     dataUserApi,
-    dataCookies?.following,
     getDataUrl,
     history,
     idUser,
@@ -188,6 +203,8 @@ function Personal(props) {
         openFromAddNews={openFromAddNews}
         setOpenFormAddNews={setOpenFormAddNews}
         onCloseForm={onCloseForm}
+        setOpenToast={setOpenToast}
+        setValueToast={setValueToast}
       />
       {showLoading && (
         <LinearProgress
@@ -201,6 +218,17 @@ function Personal(props) {
         />
       )}
       {openFormUnfollow && <UiFormUnfollow onCloseForm={onCloseForm} />}
+      <div
+        style={{
+          width: 150,
+          position: "fixed",
+          bottom: 70,
+          left: 50,
+          zIndex: 9999,
+        }}
+      >
+        {openToast && <SnackbarContent message={valueToast?.text} />}
+      </div>
 
       {ContentFollow()}
       <div className="bodyContainer">
@@ -298,27 +326,28 @@ function Personal(props) {
             </div>
             <div className="bodyContainerTop_right-bottom">
               <p id="right_body-bold">{dataUser?.name}</p>
-              {dataUser?.description}
+              {ReactHtmlParser(dataUser?.description)}
             </div>
           </div>
         </div>
       </div>
-      <PersonalContent idDataUserApi={dataUserApi?.id} />
+      {<PersonalContent idDataUserApi={dataUserApi?.id} />}
     </div>
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-    dataUserApi: state.Personal,
+    dataUserApi: state.MyPersonal,
     dataPost: state.PostById,
+    dataUser: state.User,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    personalRequest: (setShowLoading, username) => {
-      dispatch(Action.personalRequest(setShowLoading, username));
+    getPersonalByMeRequest: (setShowLoading, username) => {
+      dispatch(Action.getPersonalByMeRequest(setShowLoading, username));
     },
     followFriendRequest: (id, setShowLoading, username) => {
       dispatch(Action.followFriendRequest(id, setShowLoading, username));

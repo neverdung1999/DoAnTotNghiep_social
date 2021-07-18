@@ -15,9 +15,18 @@ import UiUpdatePost from "../uiUpdatePost/UiUpdatePost";
 import { CircularProgress } from "diginet-core-ui/components";
 import CardLoading from "../animation/cardLoading/CardLoading";
 import { db } from "../../services/firebase";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
+import UiUpdateComment from "../uiUpdateComment/UiUpdateComment";
 
 function DetailsPost(props) {
-  const { dataDetailsPost, getDetailPost, typePost } = props;
+  const {
+    dataDetailsPost,
+    getDetailPost,
+    typePost,
+    setOpenDetailsPost,
+    setOpenToast,
+    setValueToast,
+  } = props;
   const cookies = new Cookies();
   const idCookies = cookies.get("user");
   const [likePost, setLikePost] = useState([]);
@@ -34,7 +43,13 @@ function DetailsPost(props) {
   });
   const [contentChat, setContentChat] = useState([]);
   const [contentPost, setContentPost] = useState([]);
+  const [openUpdateCmt, setOpenUpdateCmt] = useState(false);
   const [contentReplyChat, setContentReplyChat] = useState([]);
+  const [dataCommentPost, setDataCommentPost] = useState(null);
+  const [openToastDetails, setOpenToastDetails] = useState(false);
+  const [valueToastDetails, setValueToastDetails] = useState({
+    text: null,
+  });
 
   useEffect(() => {
     const idPost = dataDetailsPost?.id_post;
@@ -112,6 +127,7 @@ function DetailsPost(props) {
                 for (const [key, value] of Object.entries(data?.reply)) {
                   let dataUserReply = await getUser(value?.id_account);
                   dataReply = await {
+                    id_reply: key,
                     ...value,
                     ...dataUserReply,
                     ...testnhaaa,
@@ -163,6 +179,7 @@ function DetailsPost(props) {
 
   const onCloseForm = (e) => {
     setOpenUiUpdatePost(e);
+    setOpenUpdateCmt(e);
   };
 
   const handleSubmit = () => {
@@ -213,6 +230,11 @@ function DetailsPost(props) {
     }
   };
 
+  const openUpdateComment = (content) => {
+    setOpenUpdateCmt(true);
+    setDataCommentPost(content);
+  };
+
   return (
     <div>
       {openUiUpdatePost && (
@@ -220,8 +242,34 @@ function DetailsPost(props) {
           onCloseForm={onCloseForm}
           dataDetailPost={dataDetailPost}
           setOpenUiUpdatePost={setOpenUiUpdatePost}
+          setOpenDetailsPost={setOpenDetailsPost}
+          setOpenToast={setOpenToast}
+          setValueToast={setValueToast}
         />
       )}
+      {openUpdateCmt && (
+        <UiUpdateComment
+          onCloseForm={onCloseForm}
+          dataDetailPost={dataDetailPost}
+          dataCommentPost={dataCommentPost}
+          setOpenUpdateCmt={setOpenUpdateCmt}
+          setOpenToastDetails={setOpenToastDetails}
+          setValueToastDetails={setValueToastDetails}
+        />
+      )}
+      <div
+        style={{
+          width: 150,
+          position: "fixed",
+          bottom: 70,
+          left: 50,
+          zIndex: 9999,
+        }}
+      >
+        {openToastDetails && (
+          <SnackbarContent message={valueToastDetails?.text} />
+        )}
+      </div>
       <div className="backgroundPost">
         <i
           className="fas fa-times"
@@ -342,10 +390,13 @@ function DetailsPost(props) {
                             </div>
                           </div>
                           <div className="user_right-heart">
-                            <i
-                              className="far fa-heart"
-                              id="right_heart-icon"
-                            ></i>
+                            {content?.id_account === idCookies && (
+                              <i
+                                className="fas fa-ellipsis-v"
+                                id="right_heart-icon"
+                                onClick={() => openUpdateComment(content)}
+                              ></i>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -383,10 +434,16 @@ function DetailsPost(props) {
                                                 </p>
                                               </div>
                                               <div className="all_right-heart">
-                                                <i
-                                                  className="far fa-heart"
-                                                  id="right_heart-icon"
-                                                ></i>
+                                                {item?.id_account ===
+                                                  idCookies && (
+                                                  <i
+                                                    className="fas fa-ellipsis-v"
+                                                    id="right_heart-icon"
+                                                    onClick={() =>
+                                                      openUpdateComment(item)
+                                                    }
+                                                  ></i>
+                                                )}
                                               </div>
                                             </div>
                                           </div>

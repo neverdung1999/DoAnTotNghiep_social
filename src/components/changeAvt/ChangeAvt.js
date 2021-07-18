@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import * as Action from "../../redux/actions/Index";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 
 function ChangeAvt(props) {
   const { changeAvtRequest, openChangeAvt, dataUser, getDataUrl, userHistory } =
@@ -12,6 +13,10 @@ function ChangeAvt(props) {
   const userCookies = cookies.get("username");
   const [isOpenForm, setIsOpenForm] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
+  const [openToast, setOpenToast] = useState(false);
+  const [valueToast, setValueToast] = useState({
+    text: null,
+  });
 
   useEffect(() => {}, [dataUser]);
 
@@ -21,12 +26,7 @@ function ChangeAvt(props) {
 
   const callApiImage = (value) => {
     const formData = new FormData();
-    let idUser = "";
-    if (dataUser.id) {
-      idUser = dataUser?.id;
-    } else {
-      idUser = dataUser?.id_account;
-    }
+    let objectTemp = { id: dataUser?.id };
     formData.append("file", value);
     formData.append("upload_preset", "ml_default");
     const options = {
@@ -36,8 +36,15 @@ function ChangeAvt(props) {
     fetch("https://api.Cloudinary.com/v1_1/baby-dont-cry/image/upload", options)
       .then((response) => response.json())
       .then((response) => {
+        objectTemp = { ...objectTemp, imageSrc: response?.url };
         setShowLoading(true);
-        changeAvtRequest(idUser, response.url, setShowLoading, userCookies);
+        changeAvtRequest(
+          objectTemp,
+          setShowLoading,
+          userCookies,
+          setValueToast,
+          setOpenToast
+        );
       })
       .catch((error) => {
         console.log(error);
@@ -58,6 +65,7 @@ function ChangeAvt(props) {
 
   return (
     <div>
+      {openToast && <SnackbarContent message={valueToast?.text} />}
       {showLoading && <GlobalLoading />}
       <div
         className="backgroundChangeAvt"
@@ -105,15 +113,27 @@ function ChangeAvt(props) {
 
 const mapStateToProps = (state) => {
   return {
-    dataUser: state.Personal,
+    dataUser: state.MyPersonal,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    changeAvtRequest: (idUser, response, setShowLoading, username) => {
+    changeAvtRequest: (
+      response,
+      setShowLoading,
+      username,
+      setValueToast,
+      setOpenToast
+    ) => {
       dispatch(
-        Action.changeAvtRequest(idUser, response, setShowLoading, username)
+        Action.changeAvtRequest(
+          response,
+          setShowLoading,
+          username,
+          setValueToast,
+          setOpenToast
+        )
       );
     },
   };

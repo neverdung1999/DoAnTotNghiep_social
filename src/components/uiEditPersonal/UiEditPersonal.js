@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./uiEditPersonal.css";
+import { connect } from "react-redux";
 import ScreenEditPersonal from "../screenEditPersonal/ScreenEditPersonal";
 import ScreenChangePassword from "../screenChangePassword/ScreenChangePassword";
 
@@ -72,4 +73,10 @@ function UiEditPersonal(props) {
   );
 }
 
-export default UiEditPersonal;
+const mapStateToProps = (state) => {
+  return {
+    dataUser: state.Personal,
+  };
+};
+
+export default connect(mapStateToProps, null)(UiEditPersonal);
