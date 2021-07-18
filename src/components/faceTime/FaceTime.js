@@ -8,12 +8,10 @@ function FaceTime(props) {
   const { dataCall } = props;
   const [roomToken, setRoomToken] = useState("");
   const [roomId, setRoomId] = useState("");
-  const videoContainer = document.querySelector("#videosHehe");
   const clientTemp = useRef(undefined);
   const roomTokenTemp = useRef(undefined);
   const roomTemp = useRef(undefined);
   const userTokenTemp = useRef("");
-  const videoTemp = useRef(null);
 
   useEffect(() => {
     const mounted = async () => {
@@ -28,7 +26,7 @@ function FaceTime(props) {
 
   const authen = async () => {
     return new Promise(async (resolve) => {
-      const userToken = await api.getUserToken("-McrpUu2wlCUJKRLh4MY");
+      const userToken = await api.getUserToken(dataCall?.id);
       userTokenTemp.current = userToken;
 
       if (!clientTemp.current) {
@@ -56,8 +54,7 @@ function FaceTime(props) {
     );
 
     const videoElements = localTrack.attach();
-    await addVideo(videoElements);
-    // videoContainer?.appendChild(videoElements);
+    document.querySelector("#videosHehe")?.appendChild(videoElements);
 
     const roomData = await StringeeVideo.joinRoom(
       clientTemp.current,
@@ -82,6 +79,8 @@ function FaceTime(props) {
         elements.forEach((element) => element.remove());
       });
 
+      console.log(roomData);
+
       roomData?.listTrackInfo?.forEach(async (trackInfo) => {
         await subscribeTrack(trackInfo);
       });
@@ -96,16 +95,9 @@ function FaceTime(props) {
       const track = await roomTemp.current?.subscribe(trackInfo?.serverId);
       track?.on("ready", async () => {
         const ele = track.attach();
-        videoContainer.appendChild(ele);
+        document.querySelector("#videosHehe").appendChild(ele);
       });
     }
-  };
-
-  const addVideo = async (video) => {
-    console.log(video);
-    video.setAttribute("controls", "true");
-    video.setAttribute("playsinline", "true");
-    await videoContainer.appendChild(video);
   };
 
   const createRoom = async () => {

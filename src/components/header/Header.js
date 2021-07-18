@@ -15,7 +15,6 @@ import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 
 function Header(props) {
   const {
-    logoutUser,
     data,
     idNotification,
     dataUser,
@@ -99,7 +98,7 @@ function Header(props) {
   };
 
   const handleOnSelect = (e) => {
-    window.location.replace(`http://localhost:3000/personal/${e?.username}`);
+    window.location.replace(`/personal/${e?.username}`);
   };
 
   return (
