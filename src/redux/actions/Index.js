@@ -189,6 +189,7 @@ export const changeAvtRequest = (
 ) => {
   return async (dispatch) => {
     try {
+      console.log(reponseObject);
       const response = await CallApi("PUT", "/user", reponseObject);
       setOpenToast(true);
       if (response?.data === "success") {

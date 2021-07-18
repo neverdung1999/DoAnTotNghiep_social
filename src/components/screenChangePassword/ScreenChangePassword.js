@@ -41,6 +41,7 @@ function ScreenChangePassword(props) {
   };
 
   const handleSubmit = () => {
+    console.log(123)
     let objectTemp = { id: dataPersonal?.id };
 
     if (valueInput?.password !== valueInput?.againPassword) {
