@@ -8,6 +8,7 @@ import DetailsPost from "./DetailsPost";
 import Apartment from "./Apartment";
 import CreatePayment from "./createPayment";
 import MyPersonal from "./MyPersonal";
+import PersonalOfMe from "./PersonalOfMe";
 
 const appReducers = combineReducers({
   User,
@@ -19,6 +20,7 @@ const appReducers = combineReducers({
   Apartment,
   CreatePayment,
   MyPersonal,
+  PersonalOfMe,
 });
 
 export default appReducers;

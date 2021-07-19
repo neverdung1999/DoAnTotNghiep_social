@@ -8,10 +8,12 @@ import { Popup } from "diginet-core-ui/components";
 import PaymentHistory from "../paymentHistory/PaymentHistory";
 
 function Apartment(props) {
-  const { dataBill } = props;
+  const { dataBill, dataUser } = props;
   const [contentId, setContentId] = useState(1);
   const [isShowNoti, setIsShowNoti] = useState(false);
   const [dataNoti, setDataNoti] = useState([]);
+
+  console.log(dataUser);
 
   useEffect(() => {
     let arrTemp = [];
@@ -122,6 +124,7 @@ function Apartment(props) {
 const mapStateToProps = (state) => {
   return {
     dataBill: state.Apartment.bill,
+    dataUser: state.PersonalOfMe,
   };
 };
 

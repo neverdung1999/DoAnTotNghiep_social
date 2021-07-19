@@ -8,7 +8,7 @@ import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
 import { CircularProgress } from "diginet-core-ui/components";
 
 function UiContentFollow(props) {
-  const { name, dataFollow, setOpenContentFollow, dataUser } = props;
+  const { name, dataFollow, setOpenContentFollow, dataUser,dataOfMe } = props;
   const cookies = new Cookies();
   const userCookies = cookies.get("username");
   const [showLoading, setShowLoading] = useState(null);
@@ -70,7 +70,7 @@ function UiContentFollow(props) {
           </div>
           <div className="backgroundContentFollow_form-bottom">
             {dataFollow?.map((value, index) => {
-              const checkFollowTemp = dataUser?.following?.findIndex(
+              const checkFollowTemp = dataOfMe?.following?.findIndex(
                 (item) => item?.id_account === value.id_account
               );
               return (
@@ -165,6 +165,7 @@ function UiContentFollow(props) {
 const mapStateToProps = (state) => {
   return {
     dataUser: state.MyPersonal,
+    dataOfMe: state.PersonalOfMe,
   };
 };
 

@@ -8,13 +8,13 @@ import moment from "moment";
 import * as actionsApt from "../../../redux/actions/apartment";
 
 function PaymentHistory(props) {
-  const { dataHistory } = props;
+  const { dataHistory, dataUser } = props;
   const cookies = new Cookies();
   const idCookies = cookies.get("user");
   const [isRender, setIsRender] = useState(true);
   const [data, setData] = useState([]);
   useEffect(() => {
-    isRender && props.paymentHistoryRequest(idCookies);
+    isRender && props.paymentHistoryRequest(dataUser?.id);
     setIsRender(false);
 
     setData(dataHistory);
@@ -63,6 +63,7 @@ function PaymentHistory(props) {
 const mapStateToProps = (state) => {
   return {
     dataHistory: state.Apartment.history,
+    dataUser: state.PersonalOfMe,
   };
 };
 

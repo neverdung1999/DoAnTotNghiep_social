@@ -1,22 +1,33 @@
-import Cookies from "universal-cookie";
 import CallApi from "../../utils/apiCaller";
 import * as Types from "../constants/ActionTypes";
 
-const cookies = new Cookies();
-const idCookies = cookies.get("user");
-
-console.log(idCookies);
-
-export const getBillRequest = () => {
+export const getPersonalByIdOfMeRequest = (id) => {
   return async (dispatch) => {
     try {
-      const response = await CallApi(
-        "GET",
-        `/apt/getBill?id=${idCookies}`,
-        null
-      );
-      console.log(response);
-      dispatch(getBill(response?.data));
+      const response = await CallApi("GET", `/user?id=${id}`, null);
+      console.log(response?.data);
+      dispatch(getPersonalByIdOfMe(response?.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const getPersonalByIdOfMe = (data) => {
+  return {
+    type: Types.GET_PERSONAL_BY_ID_OF_ME,
+    data,
+  };
+};
+
+export const getBillRequest = (id) => {
+  return async (dispatch) => {
+    try {
+      const response = await CallApi("GET", `/apt/getBill?id=${id}`, null);
+      if (response?.status === 200) {
+        dispatch(getBill(response?.data));
+        dispatch(getPersonalByIdOfMeRequest(id));
+      }
     } catch (error) {}
   };
 };
@@ -25,16 +36,6 @@ export const getBill = (data) => {
   return {
     type: Types.GET_BILL,
     data,
-  };
-};
-
-export const getCostRequest = () => {
-  return async (dispatch) => {
-    try {
-      const response = await CallApi("GET", "/apt/getCost", null);
-    } catch (error) {
-      console.log(error);
-    }
   };
 };
 
@@ -85,10 +86,13 @@ export const paymentHistoryRequest = (id) => {
     try {
       const response = await CallApi(
         "GET",
-        `/apt/getHistoryPay?id=${idCookies}`,
+        `/apt/getHistoryPay?id=${id}`,
         null
       );
-      response.status === 200 && dispatch(paymentHistory(response?.data));
+      if (response?.status === 200) {
+        dispatch(paymentHistory(response?.data));
+        dispatch(getPersonalByIdOfMeRequest(id));
+      }
     } catch (error) {
       console.log(error);
     }

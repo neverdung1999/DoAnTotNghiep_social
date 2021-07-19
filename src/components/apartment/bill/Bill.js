@@ -4,22 +4,21 @@ import _ from "lodash";
 import moment from "moment";
 import { connect } from "react-redux";
 import NumberFormat from "react-number-format";
-import { useHistory, Redirect } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import * as actionsApt from "../../../redux/actions/apartment";
 
 function Bill(props) {
-  const { dataBill, dataPayment, isShowNoti } = props;
+  const { dataBill, dataPayment, dataUser } = props;
   const [data, setData] = useState([]);
   let history = useHistory();
   const [isRender, setIsRender] = useState(true);
 
   useEffect(() => {
-    isRender && props.getBillRequest();
-    isRender && props.getCostRequest();
+    isRender && props.getBillRequest(dataUser?.id);
     setIsRender(false);
     setData(dataBill);
     !_.isEmpty(dataPayment) && window.location.replace(dataPayment);
-  }, [props, isRender, dataBill, dataPayment, history]);
+  }, [props, isRender, dataBill, dataPayment, history, dataUser?.id]);
 
   const handleSubmitPayment = (value) => {
     props.createPaymentRequest(value?._id, value?.tongTien);
@@ -410,16 +409,14 @@ const mapStateToProps = (state) => {
   return {
     dataBill: state.Apartment.bill,
     dataPayment: state.CreatePayment,
+    dataUser: state.PersonalOfMe,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getBillRequest: () => {
-      dispatch(actionsApt.getBillRequest());
-    },
-    getCostRequest: () => {
-      dispatch(actionsApt.getCostRequest());
+    getBillRequest: (id) => {
+      dispatch(actionsApt.getBillRequest(id));
     },
     createPaymentRequest: (id, tongTien) => {
       dispatch(actionsApt.createPaymentRequest(id, tongTien));

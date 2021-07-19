@@ -20,17 +20,18 @@ function Header(props) {
     dataUser,
     dataAllUser,
     dataPersonal,
+    dataOfMe,
   } = props;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cookies = new Cookies();
   const history = useHistory();
-  const username = cookies?.get("username");
   const imageCookies = cookies.get("imageSrc");
   const [isOpenNoti, setIsOpenNoti] = useState(false);
   const [isOpenForm, setIsOpenForm] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [isOpenHeader, setIsOpenHeader] = useState(false);
   const [countNoti, setCountNoti] = useState([]);
+  const [isRender, setIsRender] = useState(true);
 
   useEffect(() => {
     if (cookies.get("user")) {
@@ -40,25 +41,30 @@ function Header(props) {
         !value?.hasSeen && arrTemp.push(value);
       });
       setCountNoti(arrTemp);
-      props.getAllUserRequest();
+      isRender && props.getAllUserRequest();
+      setIsRender(false);
     } else {
       setIsOpenHeader(false);
       history.push("/login");
     }
-  }, [data, dataUser]);
+  }, [data, dataUser, imageCookies, isRender, dataOfMe, dataAllUser]);
 
   const openFormDropDown = () => {
     setIsOpenForm(!isOpenForm);
   };
 
   const signOut = () => {
-    props.logOutRequest(cookies?.get("user"), setIsOpenHeader);
-    // logoutUser();
+    props.logOutRequest(cookies?.get("user"));
+    cookies.remove("user");
+    cookies.remove("username");
+    cookies.remove("imageSrc");
+    setIsOpenHeader(false);
+    history.push("/login");
   };
 
   const handleChangeUser = () => {
     setShowLoading(true);
-    props.personalRequest(setShowLoading, username);
+    props.getPersonalByMeRequest(setShowLoading, dataOfMe?.username);
   };
 
   const onCloseForm = (e) => {
@@ -154,7 +160,7 @@ function Header(props) {
             </a>
 
             <div className="dropdown-avt" onClick={() => openFormDropDown()}>
-              <img src={imageCookies} alt="" id="avt" />
+              <img src={dataOfMe?.imageSrc} alt="" id="avt" />
               <div
                 className="backgrounDropdown"
                 style={isOpenForm ? { display: "block" } : { display: "none" }}
@@ -162,7 +168,7 @@ function Header(props) {
                 <div className="dropdown-content-avt">
                   <Link
                     to={{
-                      pathname: `/personal/${username}`,
+                      pathname: `/personal/${dataOfMe?.username}`,
                       state: dataPersonal,
                     }}
                     id="content-dropdown"
@@ -196,22 +202,20 @@ const mapStateToProps = (state) => {
     dataUser: state.Post,
     dataAllUser: state.User.dataAllUser,
     dataPersonal: state.Personal,
+    dataOfMe: state.PersonalOfMe,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    logoutUser: () => {
-      dispatch(Actions.logoutUser());
-    },
-    personalRequest: (setShowLoading, username) => {
-      dispatch(Actions.personalRequest(setShowLoading, username));
-    },
-    logOutRequest: (id, setIsOpenHeader) => {
-      dispatch(Actions.logOutRequest(id, setIsOpenHeader));
+    logOutRequest: (id) => {
+      dispatch(Actions.logOutRequest(id));
     },
     getAllUserRequest: () => {
       dispatch(Actions.getAllUserRequest());
+    },
+    getPersonalByMeRequest: (setShowLoading, username) => {
+      dispatch(Actions.getPersonalByMeRequest(setShowLoading, username));
     },
   };
 };

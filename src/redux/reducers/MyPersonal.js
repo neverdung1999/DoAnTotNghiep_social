@@ -8,10 +8,6 @@ const MyUser = (state = initialState, action) => {
   switch (action.type) {
     case Types.GET_MY_PERSONAL:
       const data = action.data;
-      if (data.id === cookies.get("user")) {
-        cookies.set("data", data);
-        cookies.set("username", data?.username);
-      }
       state = data;
       return state;
     case Types.PERSONAL_USER_BY_ID:

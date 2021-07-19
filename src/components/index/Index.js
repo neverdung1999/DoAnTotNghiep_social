@@ -10,7 +10,7 @@ import Suggested from "../suggested/Suggested";
 import * as actions from "../../redux/actions/Index";
 
 function Index(props) {
-  const { history, dataUser } = props;
+  const { history, dataUser, dataOfMe } = props;
   const cookies = new Cookies();
   const userCookies = cookies.get("username");
   const imageCookies = cookies.get("imageSrc");
@@ -36,22 +36,22 @@ function Index(props) {
                 <div className="avt-right">
                   <Link
                     to={{
-                      pathname: `/personal/${userCookies}`,
+                      pathname: `/personal/${dataOfMe?.username}`,
                       state: dataUser,
                     }}
                   >
-                    <img src={imageCookies} alt="" id="avt-right" />
+                    <img src={dataOfMe?.imageSrc} alt="" id="avt-right" />
                   </Link>
                 </div>
                 <div className="p-avt-right">
                   <Link
                     to={{
-                      pathname: `/personal/${userCookies}`,
+                      pathname: `/personal/${dataOfMe?.username}`,
                       state: dataUser,
                     }}
                     id="p-avt-right"
                   >
-                    <p>{userCookies}</p>
+                    <p>{dataOfMe?.username}</p>
                   </Link>
                 </div>
               </div>
@@ -82,6 +82,7 @@ const mapStateToProps = (state) => {
     isLogin: state.User.dataUser,
     dataAllUser: state.User.dataAllUser,
     dataUser: state.Personal,
+    dataOfMe: state.PersonalOfMe,
   };
 };
 

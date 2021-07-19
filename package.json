@@ -1,6 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
+  "homepage": "https://neverdung1999.github.io/DoAnTotNghiep_social/",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.12.1",
@@ -11,6 +12,7 @@
     "bootstrap": "^4.6.0",
     "diginet-core-ui": "^1.3.12",
     "firebase": "^8.6.5",
+    "gh-pages": "^3.2.3",
     "install": "^0.13.0",
     "json-server": "^0.16.3",
     "jwt-decode": "^3.1.2",
@@ -49,7 +51,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "watch": "npm-watch"
+    "watch": "npm-watch",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

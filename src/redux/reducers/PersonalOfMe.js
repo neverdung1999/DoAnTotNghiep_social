@@ -1,15 +1,12 @@
 import * as Types from "../constants/ActionTypes";
-import Cookies from "universal-cookie";
 
-const cookies = new Cookies();
 let initalState = [];
 
 const Personal = (state = initalState, action) => {
   switch (action.type) {
-    case Types.PERSONAL_USER:
-      const data = action.data.data;
+    case Types.GET_PERSONAL_BY_ID_OF_ME:
+      const data = action.data;
       state = data;
-      action.setShowLoading(false);
       return state;
     default:
       return state;

@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { Alert } from "diginet-core-ui/components";
 import * as actions from "../../redux/actions/Index";
 import { CircularProgress } from "diginet-core-ui/components";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 
 function ScreenChangePassword(props) {
   const { dataPersonal } = props;
@@ -41,14 +42,12 @@ function ScreenChangePassword(props) {
   };
 
   const handleSubmit = () => {
-    console.log(123)
     let objectTemp = { id: dataPersonal?.id };
 
     if (valueInput?.password !== valueInput?.againPassword) {
       setIsError(true);
       setOpenToast(true);
       setValueToast({
-        color: "danger",
         text: "Mật khẩu nhập lại không trùng khớp, vui lòng thử lại",
       });
       setTimeout(() => {
@@ -83,13 +82,7 @@ function ScreenChangePassword(props) {
           left: 50,
         }}
       >
-        {openToast && (
-          <Alert
-            color={valueToast?.color}
-            text={valueToast?.text}
-            style={{ width: 150, position: "fixed", bottom: 70, left: 50 }}
-          />
-        )}
+        {openToast && <SnackbarContent message={valueToast?.text} />}
       </div>
       <div className="backgroundChangePassword_top">
         <div className="backgroundChangePassword_top-left">
@@ -136,14 +129,21 @@ function ScreenChangePassword(props) {
           </div>
         </div>
       </div>
-      <div
-        className="backgroundChangePassword_submit"
-        onClick={() => handleSubmit()}
-      >
-        <div className="backgroundChangePassword_submit-btn">Đồng ý</div>
-        <div className="formSubmit_btn" onClick={() => onCloseForm()}>
+      <div className="backgroundChangePassword_submit">
+        <button
+          className="backgroundChangePassword_submit-btn"
+          onClick={() => handleSubmit()}
+          disabled={valueInput?.againPassword === "" ? true : false}
+        >
+          Đồng ý
+        </button>
+        <button
+          className="formSubmit_btn"
+          // style={valueInput?.againPassword === ""}
+          onClick={() => onCloseForm()}
+        >
           Hủy bỏ
-        </div>
+        </button>
       </div>
     </div>
   );
