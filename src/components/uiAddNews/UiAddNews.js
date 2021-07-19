@@ -64,7 +64,6 @@ function AddNews(props) {
       .then((response) => response.json())
       .then((response) => {
         arrTemp.push(response.url);
-        console.log(arrTemp);
         setImg(arrTemp);
       })
       .catch((error) => {
@@ -256,7 +255,7 @@ function AddNews(props) {
 
 const mapStateToProps = (state) => {
   return {
-    personal: state.Personal,
+    personal: state.MyPersonal,
   };
 };
 

@@ -24,7 +24,10 @@ function App(props) {
         let data;
         if (id === null) return data;
         await userRef.child(id).once("value", (snap) => {
-          const { imageSrc, username } = snap.val();
+          if (snap?.val() === null) {
+            return;
+          }
+          const { imageSrc, username } = snap?.val();
           data = { imageSrc, username };
         });
         return data;

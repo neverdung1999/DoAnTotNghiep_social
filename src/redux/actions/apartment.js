@@ -1,11 +1,19 @@
 import CallApi from "../../utils/apiCaller";
 import * as Types from "../constants/ActionTypes";
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+const idUser = cookies.get("user");
 
 export const getPersonalByIdOfMeRequest = (id) => {
   return async (dispatch) => {
     try {
-      const response = await CallApi("GET", `/user?id=${id}`, null);
-      console.log(response?.data);
+      console.log(id);
+      const response = await CallApi(
+        "GET",
+        `/user?id=${id ? id : idUser}`,
+        null
+      );
       dispatch(getPersonalByIdOfMe(response?.data));
     } catch (error) {
       console.log(error);
@@ -23,10 +31,10 @@ export const getPersonalByIdOfMe = (data) => {
 export const getBillRequest = (id) => {
   return async (dispatch) => {
     try {
+      dispatch(getPersonalByIdOfMeRequest(id));
       const response = await CallApi("GET", `/apt/getBill?id=${id}`, null);
       if (response?.status === 200) {
         dispatch(getBill(response?.data));
-        dispatch(getPersonalByIdOfMeRequest(id));
       }
     } catch (error) {}
   };
@@ -84,6 +92,7 @@ export const createPayment = (data) => {
 export const paymentHistoryRequest = (id) => {
   return async (dispatch) => {
     try {
+      dispatch(getPersonalByIdOfMeRequest(id));
       const response = await CallApi(
         "GET",
         `/apt/getHistoryPay?id=${id}`,
@@ -91,7 +100,6 @@ export const paymentHistoryRequest = (id) => {
       );
       if (response?.status === 200) {
         dispatch(paymentHistory(response?.data));
-        dispatch(getPersonalByIdOfMeRequest(id));
       }
     } catch (error) {
       console.log(error);

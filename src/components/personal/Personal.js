@@ -14,6 +14,7 @@ import UiEditPersonal from "../uiEditPersonal/UiEditPersonal";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import UiContentFollow from "../uiContentFollow/UiContentFollow";
 import PersonalContent from "../personalContent/PersonalContent";
+import CardLoading from "../animation/cardLoading/CardLoading";
 
 function Personal(props) {
   const { history, dataUserApi, dataPost } = props;

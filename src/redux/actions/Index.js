@@ -4,7 +4,6 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 const idUser = cookies.get("user");
-const username = cookies.get("username");
 
 // ------------------------------------------------------ LOGIN USER ------------------------------------------------------
 
@@ -100,7 +99,11 @@ export const getPersonalByIdOfMeRequest = (id) => {
   return async (dispatch) => {
     try {
       console.log(idUser);
-      const response = await CallApi("GET", `/user?id=${id}`, null);
+      const response = await CallApi(
+        "GET",
+        `/user?id=${id ? id : idUser}`,
+        null
+      );
       console.log(response?.data);
       dispatch(getPersonalByIdOfMe(response?.data));
     } catch (error) {
@@ -379,13 +382,25 @@ export const getPost = (data) => {
 
 // ------------------------------------------------------ GET POST BY ID ------------------------------------------------------
 
-export const getPostRequestById = (setShowLoading, id) => {
+export const getPostRequestById = (
+  setShowLoading,
+  id,
+  setOpenUiUpdatePost,
+  setOpenDetailsPost,
+  setOpenToast,
+) => {
   return async (dispatch) => {
     try {
       console.log(id);
       const response = await CallApi("GET", `/post/byId?accountId=${id}`, null);
-      console.log(response);
-      setShowLoading(false);
+      setShowLoading && setShowLoading(false);
+      setOpenUiUpdatePost && setOpenUiUpdatePost(false);
+      setOpenDetailsPost && setOpenDetailsPost(false);
+      setOpenToast && setOpenToast(true);
+
+      setTimeout(() => {
+        setOpenToast && setOpenToast(false);
+      }, 6000);
       if (response?.status === 200) {
         dispatch(getPostById(response?.data));
       }
@@ -650,19 +665,21 @@ export const deletePostRequest = (
         id_post: idPost,
         id_account: idAccount,
       });
-      setShowLoading && setShowLoading(false);
+      // setShowLoading && setShowLoading(false);
       if (response?.status === 200) {
-        setOpenUiUpdatePost && setOpenUiUpdatePost(false);
-        setOpenDetailsPost && setOpenDetailsPost(false);
-        setOpenToast && setOpenToast(true);
         setValueToast &&
           setValueToast({
             text: "Xóa bài viết thành công",
           });
-        setTimeout(() => {
-          setOpenToast && setOpenToast(false);
-        }, 6000);
-        dispatch(getPostRequestById(setShowLoading, idAccount));
+        dispatch(
+          getPostRequestById(
+            setShowLoading,
+            idAccount,
+            setOpenUiUpdatePost,
+            setOpenDetailsPost,
+            setOpenToast,
+          )
+        );
       } else {
         setTimeout(() => {
           setValueToast &&
