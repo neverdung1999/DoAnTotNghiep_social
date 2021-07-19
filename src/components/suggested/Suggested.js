@@ -14,6 +14,8 @@ function Suggested(props) {
     dataPersonal?.following?.findIndex((value) => console.log(value));
   });
 
+  console.log(dataSuggested);
+
   const handleFollow = (e) => {
     setShowLoading(true);
     setIdChoose(e.id);

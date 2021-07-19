@@ -54,12 +54,13 @@ function Header(props) {
   };
 
   const signOut = () => {
-    props.logOutRequest(cookies?.get("user"));
+    console.log(dataOfMe);
     cookies.remove("user");
     cookies.remove("username");
     cookies.remove("imageSrc");
     setIsOpenHeader(false);
     history.push("/login");
+    props.logOutRequest(dataOfMe?.id);
   };
 
   const handleChangeUser = () => {

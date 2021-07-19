@@ -82,8 +82,6 @@ function Login(props) {
       messagePassword === ""
     ) {
       setShowLoading(true);
-      console.log(valueInputEmail);
-      console.log(valueInputPassword);
       loginUserRequest(
         valueInputEmail,
         valueInputPassword,

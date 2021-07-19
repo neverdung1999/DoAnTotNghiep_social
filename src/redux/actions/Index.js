@@ -48,6 +48,7 @@ export const removeState = () => {
 export const logOutRequest = (id) => {
   return async (dispatch) => {
     try {
+      console.log(id);
       const results = await CallApi("PUT", `/user/signIn?id=${id}`, null);
     } catch (error) {
       console.log(error);
@@ -98,13 +99,11 @@ export const registerUser = (data, history) => {
 export const getPersonalByIdOfMeRequest = (id) => {
   return async (dispatch) => {
     try {
-      console.log(idUser);
       const response = await CallApi(
         "GET",
         `/user?id=${id ? id : idUser}`,
         null
       );
-      console.log(response?.data);
       dispatch(getPersonalByIdOfMe(response?.data));
     } catch (error) {
       console.log(error);
@@ -127,7 +126,7 @@ export const getPersonalByMeRequest = (setShowLoading, username) => {
       if (response?.status === 200) {
         dispatch(getPersonalByMe(response?.data));
         dispatch(getPostRequestById(setShowLoading, response?.data?.id));
-        dispatch(getPersonalByIdOfMeRequest(idUser));
+        idUser && dispatch(getPersonalByIdOfMeRequest(idUser));
       }
     } catch (error) {
       console.log(error);
@@ -217,7 +216,7 @@ export const changeAvtRequest = (
             reponseObject?.username ? reponseObject?.username : username
           )
         );
-        dispatch(getPersonalByIdOfMeRequest(idUser));
+        idUser && dispatch(getPersonalByIdOfMeRequest(idUser));
       } else {
         setValueToast({
           text: "Cập nhật dữ liệu thất bại",
@@ -257,7 +256,8 @@ export const removeFriendRequest = (
       `/user/follow?myId=${idUser}&followingId=${id}`
     ).then((res) => {
       setOpenFormUnfollow(false);
-      // setOpenContentFollow && setOpenContentFollow(false);
+      setOpenContentFollow && setOpenContentFollow(false);
+      console.log(res);
       if (res?.status === 200) {
         dispatch(suggestedAccountRequest(idUser));
         dispatch(getPersonalByMeRequest(setShowLoading, username));
@@ -361,7 +361,7 @@ export const getPostRequest = (setShowLoading, id) => {
   return async (dispatch) => {
     try {
       dispatch(suggestedAccountRequest(id));
-      dispatch(getPersonalByIdOfMeRequest(id));
+      id && dispatch(getPersonalByIdOfMeRequest(id));
       const response = await CallApi("GET", `/post?id=${id}`, null);
       setShowLoading && setShowLoading(false);
       if (response.status === 200) {
@@ -387,11 +387,10 @@ export const getPostRequestById = (
   id,
   setOpenUiUpdatePost,
   setOpenDetailsPost,
-  setOpenToast,
+  setOpenToast
 ) => {
   return async (dispatch) => {
     try {
-      console.log(id);
       const response = await CallApi("GET", `/post/byId?accountId=${id}`, null);
       setShowLoading && setShowLoading(false);
       setOpenUiUpdatePost && setOpenUiUpdatePost(false);
