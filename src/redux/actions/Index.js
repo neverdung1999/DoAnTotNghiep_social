@@ -369,16 +369,29 @@ export const getDetailsPostRequest = (
   };
 };
 
-export const getPostRequest = (setShowLoading, id) => {
+export const getPostRequest = (
+  setShowLoading,
+  id,
+  setValueToast,
+  setOpenToast
+) => {
   return async (dispatch) => {
     try {
       dispatch(suggestedAccountRequest(id));
       id && dispatch(getPersonalByIdOfMeRequest(id));
       const response = await CallApi("GET", `/post?id=${id}`, null);
+      setOpenToast && setOpenToast(true);
       setShowLoading && setShowLoading(false);
       if (response.status === 200) {
         dispatch(getPost(response?.data));
+        setValueToast && setValueToast({ text: "Đã cập nhật bài viết !!!" });
+      } else {
+        setValueToast &&
+          setValueToast({ text: "Cập nhật bài viết thất bại !!!" });
       }
+      setTimeout(() => {
+        setOpenToast && setOpenToast(false);
+      }, 6000);
     } catch (error) {
       console.log(error);
     }

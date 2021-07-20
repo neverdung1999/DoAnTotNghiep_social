@@ -10,8 +10,10 @@ import { useHistory } from "react-router-dom";
 import logo from "../../uploads/img/logo.png";
 import * as Actions from "../../redux/actions/Index";
 import Notification from "../notification/Notification";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import { LinearProgress } from "diginet-core-ui/components";
 
 function Header(props) {
   const {
@@ -32,6 +34,8 @@ function Header(props) {
   const [isOpenHeader, setIsOpenHeader] = useState(false);
   const [countNoti, setCountNoti] = useState([]);
   const [isRender, setIsRender] = useState(true);
+  const [openToast, setOpenToast] = useState(false);
+  const [valueToast, setValueToast] = useState({ text: null });
 
   useEffect(() => {
     if (cookies.get("user")) {
@@ -54,7 +58,6 @@ function Header(props) {
   };
 
   const signOut = () => {
-    console.log(dataOfMe);
     cookies.remove("user");
     cookies.remove("username");
     cookies.remove("imageSrc");
@@ -108,16 +111,48 @@ function Header(props) {
     window.location.replace(`/personal/${e?.username}`);
   };
 
+  const handleLoadLogo = () => {
+    setShowLoading(true);
+    window.scrollTo(0, 0);
+    props.getPostRequest(
+      setShowLoading,
+      dataOfMe?.id,
+      setValueToast,
+      setOpenToast
+    );
+  };
+
   return (
     <div>
-      {showLoading && <GlobalLoading />}
+      {showLoading && (
+        <LinearProgress
+          color="#d82b7d"
+          duration={1}
+          height={3}
+          percent={75}
+          showValue
+          valuePosition="top"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
+        />
+      )}
+      <div
+        style={{
+          width: 150,
+          position: "fixed",
+          bottom: 70,
+          left: 50,
+          zIndex: 9999,
+        }}
+      >
+        {openToast && <SnackbarContent message={valueToast?.text} />}
+      </div>
       <div
         className="header"
         style={isOpenHeader ? { display: "block" } : { display: "none" }}
       >
         {isOpenNoti && <Notification data={data} onCloseForm={onCloseForm} />}
         <div className="container">
-          <div className="logo" onClick={() => window.scrollTo(0, 0)}>
+          <div className="logo" onClick={() => handleLoadLogo()}>
             <Link to="/">
               <img src={logo} id="logo" alt="" />
             </Link>
@@ -217,6 +252,11 @@ const mapDispatchToProps = (dispatch) => {
     },
     getPersonalByMeRequest: (setShowLoading, username) => {
       dispatch(Actions.getPersonalByMeRequest(setShowLoading, username));
+    },
+    getPostRequest: (setShowLoading, id, setValueToast, setOpenToast) => {
+      dispatch(
+        Actions.getPostRequest(setShowLoading, id, setValueToast, setOpenToast)
+      );
     },
   };
 };
