@@ -30,6 +30,7 @@ function Index(props) {
       <div className="body-content">
         <div className="body-container">
           <Post />
+          
           <div className="content-right">
             <div className="item-right">
               <div className="right-top">

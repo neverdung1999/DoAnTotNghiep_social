@@ -12,11 +12,12 @@ import { Slide } from "react-slideshow-image";
 import ReactHtmlParser from "react-html-parser";
 import * as actions from "../../redux/actions/Index";
 import DetailsPost from "../detailsPost/DetailsPost";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
 import CardLoading from "../animation/cardLoading/CardLoading";
 import { LinearProgress, CircularProgress } from "diginet-core-ui/components";
 
 function Post(props) {
-  const { dataPost } = props;
+  const { dataPost, dataLoadmore } = props;
   const cookies = new Cookies();
   const idCookies = cookies.get("user");
   const [idPost, setIdPost] = useState("");
@@ -28,12 +29,17 @@ function Post(props) {
   const [dataDetailsPost, setDataDetailsPost] = useState(null);
   const [openDetailsPost, setOpenDetailsPost] = useState(false);
   const [showLoadingComment, setShowLoadingComment] = useState(false);
+  const [showLoadingLoadmore, setShowLoadingLoadmore] = useState(false);
+  const [openToast, setOpenToast] = useState(false);
+  const [valueToast, setValueToast] = useState({ text: null });
 
   useEffect(() => {
+    let arrTest = [];
+    let arrTemp = [];
     if (idCookies) isRender && props.getPostRequest(setShowLoading, idCookies);
     setIsRender(false);
-    setDataNewsPost(dataPost);
-    let arrTemp = [];
+    arrTest = dataPost;
+    setDataNewsPost(arrTest);
     dataPost?.forEach((item) => {
       if (item?.likes) {
         for (const [key] of Object.entries(item.likes)) {
@@ -44,6 +50,11 @@ function Post(props) {
       }
     });
     setLikePost(_.uniqWith(arrTemp, _.isEqual));
+    if (!_.isEmpty(dataLoadmore)) {
+      const concatArr = arrTest.concat(dataLoadmore);
+      setDataNewsPost(concatArr);
+    } else {
+    }
   }, [props, idCookies, isRender, dataPost?.id_account, dataPost, idPost]);
 
   const handleClickChoosePost = (data) => {
@@ -87,7 +98,17 @@ function Post(props) {
     props.likePostRequest(idPost, idOwner, idCookies, setShowLoadingComment);
   };
 
-  console.log(dataPost);
+  const handleLoadmore = () => {
+    setShowLoadingLoadmore(true);
+    const dataLoadmore = _.orderBy(dataNewsPost, "timestamp", "asc").shift();
+    props.getLoadmorePostRequest(
+      dataLoadmore?.id_account,
+      dataLoadmore?.timestamp,
+      setShowLoadingLoadmore,
+      setValueToast,
+      setOpenToast
+    );
+  };
 
   return (
     <div>
@@ -111,14 +132,26 @@ function Post(props) {
         />
       )}
       {/* {showLoading && <GlobalLoading />} */}
+
+      <div
+        style={{
+          width: 150,
+          position: "fixed",
+          bottom: 70,
+          left: 50,
+          zIndex: 9999,
+        }}
+      >
+        {openToast && <SnackbarContent message={valueToast?.text} />}
+      </div>
       {showLoading && <CardLoading actionTypes="post" />}
 
       <div id="scrollableDiv" className="backgroundItem">
         {!showLoading &&
-          (_.isEmpty(dataPost) ? (
+          (_.isEmpty(dataNewsPost) ? (
             <h3>Hiện chưa có bài viết nào!!!</h3>
           ) : (
-            _.orderBy(dataPost, "timestamp", "desc")?.map((item, index) => {
+            _.orderBy(dataNewsPost, "timestamp", "desc")?.map((item, index) => {
               return (
                 <div key={index} className="backgroundItem_form">
                   <div className="backgroundItem_form-top">
@@ -281,6 +314,28 @@ function Post(props) {
               );
             })
           ))}
+        {!showLoading && (
+          <div className="loadmore" onClick={() => handleLoadmore()}>
+            Xem thêm <i className="fas fa-chevron-down" id="loadmoreIcon"></i>{" "}
+            {showLoadingLoadmore && (
+              <CircularProgress
+                color="#f26e41"
+                direction="bottom"
+                percent={100}
+                percentColor="#0095ff"
+                size="extraSmall"
+                strokeWidth={10}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: "35%",
+                  fontSize: 10,
+                  zIndex: 10000,
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -289,6 +344,7 @@ function Post(props) {
 const mapStateToProps = (state) => {
   return {
     dataPost: state.Post,
+    dataLoadmore: state.Loadmore,
   };
 };
 
@@ -296,6 +352,23 @@ const mapDispatchToProps = (dispatch) => {
   return {
     getPostRequest: (setShowLoading, id) => {
       dispatch(actions.getPostRequest(setShowLoading, id));
+    },
+    getLoadmorePostRequest: (
+      idUser,
+      timestamp,
+      setShowLoadingLoadmore,
+      setValueToast,
+      setOpenToast
+    ) => {
+      dispatch(
+        actions.getLoadmorePostRequest(
+          idUser,
+          timestamp,
+          setShowLoadingLoadmore,
+          setValueToast,
+          setOpenToast
+        )
+      );
     },
     likePostRequest: (idPost, idOwner, idCookies, setShowLoadingComment) => {
       dispatch(

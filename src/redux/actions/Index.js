@@ -392,6 +392,44 @@ export const getPost = (data) => {
   };
 };
 
+export const getLoadmorePostRequest = (
+  idUser,
+  timestamp,
+  setShowLoadingLoadmore,
+  setValueToast,
+  setOpenToast
+) => {
+  return async (dispatch) => {
+    try {
+      const response = await CallApi(
+        "GET",
+        `/post?id=${idUser}&timestamp=${timestamp}`
+      );
+      setShowLoadingLoadmore && setShowLoadingLoadmore(false);
+      setOpenToast && setOpenToast(true);
+      if (response?.status === 200 && !_.isEmpty(response?.data)) {
+        dispatch(getLoadmorePost(response?.data));
+        setValueToast && setValueToast({ text: "Đã tải thêm bài viết !!!" });
+      } else {
+        setValueToast &&
+          setValueToast({ text: "Hiện tại không còn bài viết !!!" });
+      }
+      setTimeout(() => {
+        setOpenToast && setOpenToast(false);
+      }, 6000);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const getLoadmorePost = (data) => {
+  return {
+    type: Types.LOAD_MORE,
+    data,
+  };
+};
+
 // ------------------------------------------------------ GET POST BY ID ------------------------------------------------------
 
 export const getPostRequestById = (

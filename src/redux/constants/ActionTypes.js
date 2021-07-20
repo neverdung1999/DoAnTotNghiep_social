@@ -18,6 +18,8 @@ export const ALL_USER = "ALL_USER";
 export const VALUE_TOAST = "VALUE_TOAST";
 export const GET_MY_PERSONAL = "GET_MY_PERSONAL";
 export const GET_PERSONAL_BY_ID_OF_ME = "GET_PERSONAL_BY_ID_OF_ME";
+export const LOAD_MORE = "LOAD_MORE";
+
 
 // ------------------------ APARTMENT ------------------------------
 export const GET_BILL = "GET_BILL";

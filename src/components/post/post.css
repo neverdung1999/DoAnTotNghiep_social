@@ -51,6 +51,10 @@
   font-size: 13px;
 }
 
+#loadmoreIcon{
+  margin-left: 10px;
+}
+
 .backgroundItem{
   width: 700px;
   padding: 10px 40px;
@@ -193,4 +197,16 @@
 
 .react-slideshow-container .nav{
   z-index: 1;
+}
+
+.loadmore{
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,.1);
+  padding: 10px;
+  border-radius: 10px;
 }
