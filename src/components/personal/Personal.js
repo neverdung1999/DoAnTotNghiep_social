@@ -39,6 +39,8 @@ function Personal(props) {
     text: null,
   });
 
+  console.log(dataUserApi);
+
   useEffect(() => {
     if (!idUser) {
       history.push("/");
@@ -73,10 +75,10 @@ function Personal(props) {
 
           setDataUser(dataUserApi);
 
-          if (!_.isEmpty(dataUserApi) && dataUserApi?.username !== username) {
+          if (!_.isEmpty(dataUserApi) && dataUserApi?.id_account !== idUser) {
             if (!_.isEmpty(dataUserApi?.followers)) {
               for (let i = 0; i < _.size(dataUserApi?.followers); i++) {
-                if (dataUserApi?.followers[i]?.username === username) {
+                if (dataUserApi?.followers[i]?.id_account === idUser) {
                   setCheckUserFollow(1);
                   return;
                 } else {
@@ -103,6 +105,9 @@ function Personal(props) {
     username,
     dataPost,
   ]);
+
+  console.log(dataUser);
+
 
   const valueFollow = [
     {
