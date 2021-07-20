@@ -97,7 +97,7 @@ export const registerUser = (data, history) => {
 
 // ------------------------------------------------------  PERSONAL USER ------------------------------------------------------
 
-export const getPersonalByIdOfMeRequest = (id) => {
+export const getPersonalByIdOfMeRequest = (id, setShowLoading) => {
   return async (dispatch) => {
     try {
       const response = await CallApi(
@@ -105,6 +105,7 @@ export const getPersonalByIdOfMeRequest = (id) => {
         `/user?id=${id ? id : idUser}`,
         null
       );
+      setShowLoading && setShowLoading(false);
       dispatch(getPersonalByIdOfMe(response?.data));
     } catch (error) {
       console.log(error);
@@ -384,7 +385,7 @@ export const getPostRequest = (
       setShowLoading && setShowLoading(false);
       if (response.status === 200) {
         dispatch(getPost(response?.data));
-        setValueToast && setValueToast({ text: "Đã cập nhật bài viết !!!" });
+        setValueToast && setValueToast({ text: "Đã tải bài viết !!!" });
       } else {
         setValueToast &&
           setValueToast({ text: "Cập nhật bài viết thất bại !!!" });

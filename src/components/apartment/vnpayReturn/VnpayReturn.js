@@ -15,7 +15,6 @@ function VnpayReturn(props) {
     const getReturnVnPay = async () => {
       try {
         const response = await CallApi("GET", `/vnpay_return?${url}`, null);
-        console.log(response);
         if (response?.data?.code === "00") {
           setData(response?.data);
           setDataSuccess(true);

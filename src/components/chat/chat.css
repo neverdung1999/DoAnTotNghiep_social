@@ -290,6 +290,12 @@
   object-fit: cover;
 }
 
+#icon_imageChoose{
+  position: absolute;
+  top: 5px;
+  right: 10px;
+}
+
 .lblImageChat {
   position: relative;
   width: 35px;
@@ -458,6 +464,7 @@
 }
 
 .showImgChoose_img{
+  position: relative;
   width: 150px;
   height: 100%;
   margin-right: 10px;

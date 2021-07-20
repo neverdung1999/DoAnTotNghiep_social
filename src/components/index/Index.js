@@ -13,7 +13,6 @@ function Index(props) {
   const { history, dataUser, dataOfMe } = props;
   const cookies = new Cookies();
   const userCookies = cookies.get("username");
-  const imageCookies = cookies.get("imageSrc");
   const [isRender, setIsRender] = useState(true);
   const [showLoading, setShowLoading] = useState(false);
 

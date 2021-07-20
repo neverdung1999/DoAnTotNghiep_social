@@ -11,6 +11,7 @@ import * as actions from "../../redux/actions/Index";
 import UiGroupChat from "../uiGroupChat/UiGroupChat";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 import FaceTime from "../faceTime/FaceTime";
+import { LinearProgress } from "diginet-core-ui/components";
 
 let arrImg = [];
 
@@ -78,7 +79,7 @@ function Chat(props) {
     stateHistory ? setDataFriend(arrConcat) : setDataFriend(arrTemp?.current);
 
     try {
-      isRender && personalRequest(setShowLoading, username);
+      isRender && props.getPersonalByIdOfMeRequest(idUser, setShowLoading);
       setIsRender(false);
 
       const getDataChatRequest = async () => {
@@ -90,8 +91,9 @@ function Chat(props) {
           .orderByChild(`containId/${idUser}/id`)
           .equalTo(idUser)
           .on("value", (snapshot) => {
-            if (snapshot.val() !== null)
+            if (snapshot.val() !== null) {
               for (const [key, value] of Object.entries(snapshot.val())) {
+                console.log(value);
                 if (_.size(value?.containId) === 2) {
                   for (const [keyId, valueId] of Object.entries(
                     value?.containId
@@ -119,6 +121,8 @@ function Chat(props) {
                       }
                     }
 
+                    console.log(arrTemp);
+
                     setDataFriend(
                       _.uniqWith(
                         _.sortBy(arrTemp, ["lastTime"], ["desc"]),
@@ -137,6 +141,7 @@ function Chat(props) {
                   }
                 }
               }
+            }
 
             if (roomIdTemp !== "") {
               db.ref("chat_messages/" + roomIdTemp).on("value", (snapshot) => {
@@ -152,6 +157,7 @@ function Chat(props) {
               setRoomId("");
             }
           });
+        arrTemp = [];
       };
 
       getDataChatRequest();
@@ -174,6 +180,7 @@ function Chat(props) {
     arrFriendNews,
     dataUserApi?.dataAllUser,
     history,
+    props,
   ]);
 
   const handleChangeImg = (e) => {
@@ -307,10 +314,31 @@ function Chat(props) {
     setOpenFaceTime(true);
   };
 
+  console.log(imgChoose);
+
+  const handleRemoveImage = (image) => {
+    console.log(image);
+    let arrImgClone = [...imgChoose];
+    const results = arrImgClone.findIndex((img) => img === image);
+    arrImgClone.splice(results, 1);
+    setImgChoose(arrImgClone);
+  };
+
   return (
     <div>
       {openFaceTime && <FaceTime dataCall={dataCall} />}
       {showLoading && <GlobalLoading />}
+      {showLoading && (
+        <LinearProgress
+          color="#d82b7d"
+          duration={1}
+          height={3}
+          percent={75}
+          showValue
+          valuePosition="top"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
+        />
+      )}
       <UiGroupChat
         openGroupChat={openGroupChat}
         onCloseForm={onCloseForm}
@@ -495,6 +523,11 @@ function Chat(props) {
                       return (
                         <div className="showImgChoose_img" key={index}>
                           <img src={item} id="showImgChoose_img" alt="" />
+                          <i
+                            class="fas fa-times"
+                            id="icon_imageChoose"
+                            onClick={() => handleRemoveImage(item)}
+                          ></i>
                         </div>
                       );
                     })}
@@ -565,8 +598,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    personalRequest: (setShowLoading, username) => {
-      dispatch(actions.personalRequest(setShowLoading, username));
+    getPersonalByIdOfMeRequest: (id, setShowLoading) => {
+      dispatch(actions.getPersonalByIdOfMeRequest(id, setShowLoading));
     },
   };
 };

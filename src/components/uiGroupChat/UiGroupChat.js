@@ -7,7 +7,7 @@ function UiGroupChat(props) {
   const { openGroupChat, dataUser } = props;
   const [arrItemChoose, setArrItemChoose] = useState([]);
   const [arrDataItemChoose, setArrDataItemChoose] = useState([]);
-
+  
   useEffect(() => {
     !_.isEmpty(arrDataItemChoose) &&
       arrDataItemChoose.length === 1 &&
@@ -81,6 +81,7 @@ function UiGroupChat(props) {
         "https://images.vexels.com/media/users/3/132363/isolated/preview/a31cc22b4b43c6dacdf885948f886f7c-support-blue-circle-icon-by-vexels.png",
       username: objectTempUsername.toString(),
       name: "Nhắn tin trò chuyện cùng bạn bè nhé",
+      lastTime: Date.now(),
     });
 
     await db.ref(`chat_messages/${getKey}`).push({
@@ -106,9 +107,13 @@ function UiGroupChat(props) {
             <div className="formGroupChat_top-body">Tin nhắn mới</div>
             <div
               className="formGroupChat_top-right"
-              onClick={!_.isEmpty(arrItemChoose) ? () => onCreateChat() : null}
+              onClick={
+                _.isEmpty(arrItemChoose) || _.size(arrItemChoose) === 1
+                  ? null
+                  : () => onCreateChat()
+              }
               style={
-                _.isEmpty(arrItemChoose)
+                _.isEmpty(arrItemChoose) || _.size(arrItemChoose) === 1
                   ? { color: "#b7e1fd" }
                   : { color: "#1ea1f7" }
               }

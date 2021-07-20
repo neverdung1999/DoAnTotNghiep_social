@@ -13,8 +13,6 @@ function Apartment(props) {
   const [isShowNoti, setIsShowNoti] = useState(false);
   const [dataNoti, setDataNoti] = useState([]);
 
-  console.log(dataUser);
-
   useEffect(() => {
     let arrTemp = [];
     const dateNow = Date.now();
