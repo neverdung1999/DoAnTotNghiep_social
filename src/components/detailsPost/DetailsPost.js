@@ -7,16 +7,18 @@ import "./detailsPost.css";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import TimeStamp from "../../timeStamp";
+import { Link } from "react-router-dom";
+import { db } from "../../services/firebase";
 import { Slide } from "react-slideshow-image";
 import "react-slideshow-image/dist/styles.css";
 import ReactHtmlParser from "react-html-parser";
 import * as actions from "../../redux/actions/Index";
 import UiUpdatePost from "../uiUpdatePost/UiUpdatePost";
-import { CircularProgress } from "diginet-core-ui/components";
 import CardLoading from "../animation/cardLoading/CardLoading";
-import { db } from "../../services/firebase";
 import SnackbarContent from "@material-ui/core/SnackbarContent";
 import UiUpdateComment from "../uiUpdateComment/UiUpdateComment";
+import { CircularProgress, LinearProgress } from "diginet-core-ui/components";
+import NotFound from "./../notFount/NotFound";
 
 function DetailsPost(props) {
   const {
@@ -50,6 +52,8 @@ function DetailsPost(props) {
   const [valueToastDetails, setValueToastDetails] = useState({
     text: null,
   });
+  const [showLoadingGlobal, setShowLoadingGlobal] = useState(false);
+  const [openNotFound, setOpenNotFound] = useState(false);
 
   useEffect(() => {
     const idPost = dataDetailsPost?.id_post;
@@ -57,7 +61,8 @@ function DetailsPost(props) {
       props.getPostRequestByIdPost(
         setShowLoading,
         idPost,
-        setShowLoadingComment
+        setShowLoadingComment,
+        setOpenNotFound
       );
     setIsRender(false);
 
@@ -148,8 +153,15 @@ function DetailsPost(props) {
     }
   }, [isRender, dataDetailsPost, idCookies, props, getDetailPost]);
 
-  const onCloseFrom = () => {
+  console.log(dataDetailPost);
+
+  const onCloseFrom = (e) => {
     props.onCloseForm();
+  };
+
+  const onCloseFormNotFound = () => {
+    setOpenNotFound(false);
+    setOpenDetailsPost(false);
   };
 
   const handleChange = (e) => {
@@ -200,7 +212,7 @@ function DetailsPost(props) {
           dataUserReply?.id,
           dataUserReply?.idComment,
           idCookies,
-          `@<a href="personal/${dataUserReply?.username}">${dataUserReply?.username}</a> ${contentMessage}`,
+          `@<a href="/personal/${dataUserReply?.username}">${dataUserReply?.username}</a> ${contentMessage}`,
           [dataUserReply?.id],
           setShowLoadingComment
         );
@@ -235,6 +247,15 @@ function DetailsPost(props) {
     setDataCommentPost(content);
   };
 
+  const handleChoose = (value) => {
+    setShowLoadingGlobal(true);
+    props.getPersonalByMeRequest(
+      setShowLoading,
+      value?.username,
+      setOpenDetailsPost
+    );
+  };
+
   return (
     <div>
       {openUiUpdatePost && (
@@ -247,6 +268,7 @@ function DetailsPost(props) {
           setValueToast={setValueToast}
         />
       )}
+      {openNotFound && <NotFound onCloseFormNotFound={onCloseFormNotFound} />}
       {openUpdateCmt && (
         <UiUpdateComment
           onCloseForm={onCloseForm}
@@ -255,6 +277,17 @@ function DetailsPost(props) {
           setOpenUpdateCmt={setOpenUpdateCmt}
           setOpenToastDetails={setOpenToastDetails}
           setValueToastDetails={setValueToastDetails}
+        />
+      )}
+      {showLoadingGlobal && (
+        <LinearProgress
+          color="#d82b7d"
+          duration={1}
+          height={3}
+          percent={75}
+          showValue
+          valuePosition="top"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
         />
       )}
       <div
@@ -284,7 +317,7 @@ function DetailsPost(props) {
                 autoplay={false}
                 style={{ width: "100%", height: "100%" }}
                 transitionDuration={300}
-                arrows={dataDetailPost?.imageSrc?.lenght === 1 ? false : true}
+                arrows={_.size(dataDetailPost?.imageSrc) === 1 ? false : true}
               >
                 {contentPost?.imageSrc?.map((item, index) => {
                   return (
@@ -362,9 +395,15 @@ function DetailsPost(props) {
                         <div className="comment_user-right">
                           <div className="user_right-comment">
                             <div className="right_comment-top">
-                              <a href="#" id="user_right-a">
+                              <Link
+                                to={{
+                                  pathname: `/personal/${content?.username}`,
+                                }}
+                                onClick={() => handleChoose(content)}
+                                id="user_right-a"
+                              >
                                 {content?.username}
-                              </a>
+                              </Link>
                               <p id="user_right-p">
                                 {ReactHtmlParser(content?.content)}
                               </p>
@@ -425,13 +464,20 @@ function DetailsPost(props) {
                                             </div>
                                             <div className="right_all-right">
                                               <div className="all_right-comment">
-                                                <p id="all_right-content">
+                                                <Link
+                                                  to={{
+                                                    pathname: `/personal/${item?.username}`,
+                                                  }}
+                                                  onClick={() =>
+                                                    handleChoose(item)
+                                                  }
+                                                  style={{ color: "black" }}
+                                                  id="all_right-content"
+                                                >
                                                   <b>{item?.username}</b>
-                                                  <br />
-                                                  {ReactHtmlParser(
-                                                    item?.content
-                                                  )}
-                                                </p>
+                                                </Link>
+                                                <br />
+                                                {ReactHtmlParser(item?.content)}
                                               </div>
                                               <div className="all_right-heart">
                                                 {item?.id_account ===
@@ -600,17 +646,36 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getPostRequestByIdPost: (setShowLoading, idPost, setShowLoadingComment) => {
+    getPostRequestByIdPost: (
+      setShowLoading,
+      idPost,
+      setShowLoadingComment,
+      setOpenNotFound
+    ) => {
       dispatch(
         actions.getPostRequestByIdPost(
           setShowLoading,
           idPost,
-          setShowLoadingComment
+          setShowLoadingComment,
+          setOpenNotFound
         )
       );
     },
     likePostRequest: (idPost, idOwner, idCookies, typePost) => {
       dispatch(actions.likePostRequest(idPost, idOwner, idCookies, typePost));
+    },
+    getPersonalByMeRequest: (
+      setShowLoading,
+      username,
+      setOpenContentFollow
+    ) => {
+      dispatch(
+        actions.getPersonalByMeRequest(
+          setShowLoading,
+          username,
+          setOpenContentFollow
+        )
+      );
     },
     commentPostRequest: (
       idPost,

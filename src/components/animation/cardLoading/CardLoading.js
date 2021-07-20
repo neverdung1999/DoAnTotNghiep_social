@@ -1,6 +1,6 @@
 import React from "react";
 import "semantic-ui-css/semantic.min.css";
-import { Placeholder } from "semantic-ui-react";
+import { Placeholder, Card } from "semantic-ui-react";
 
 function CardLoading(props) {
   const { actionTypes } = props;
@@ -11,7 +11,7 @@ function CardLoading(props) {
         <Placeholder
           fluid
           style={{
-            border: "20px solid white",
+            border: "30px solid white",
             borderRadius: 10,
             width: 620,
             marginLeft: 40,
@@ -30,13 +30,108 @@ function CardLoading(props) {
             <Placeholder.Line length="very short" />
           </Placeholder.Header>
           <Placeholder.Paragraph
-            style={{ width: "100%", height: 467 }}
+            style={{
+              width: "100%",
+              height: 500,
+              borderTop: "30px solid white",
+            }}
           ></Placeholder.Paragraph>
-          <Placeholder.Line />
-          <Placeholder.Line />
-          <Placeholder.Line />
-          <Placeholder.Line />
+          <Placeholder.Line style={{ height: "30px" }} />
+          <Placeholder.Line style={{ height: "30px" }} />
+          <Placeholder.Line style={{ height: "30px" }} />
+          <Placeholder.Line style={{ height: "30px" }} />
         </Placeholder>
+      );
+    case "personal":
+      return (
+        <div style={{ marginTop: "10%", marginLeft: "8%" }}>
+          <div
+            style={{
+              width: "1000px",
+              height: "100%",
+              display: "flex",
+              paddingTop: "5%",
+            }}
+          >
+            <div style={{ width: "30%", height: "100%" }}>
+              <Placeholder
+                style={{ height: 150, width: 150, borderRadius: "50%" }}
+              >
+                <Placeholder.Image />
+              </Placeholder>
+            </div>
+            <div
+              style={{
+                width: "70%",
+                height: "100%",
+                marginBottom: "20%",
+              }}
+            >
+              <Placeholder>
+                <Placeholder.Line
+                  style={{
+                    height: "20px",
+                    backgroundColor: "rgb(240, 242, 245)",
+                  }}
+                />{" "}
+                <Placeholder.Line
+                  style={{
+                    height: "20px",
+                    backgroundColor: "rgb(240, 242, 245)",
+                  }}
+                />{" "}
+                <Placeholder.Line
+                  style={{
+                    height: "20px",
+                    backgroundColor: "rgb(240, 242, 245)",
+                  }}
+                />{" "}
+                <Placeholder.Line
+                  style={{
+                    height: "20px",
+                    backgroundColor: "rgb(240, 242, 245)",
+                  }}
+                />{" "}
+                <Placeholder.Line
+                  style={{
+                    height: "20px",
+                    backgroundColor: "rgb(240, 242, 245)",
+                  }}
+                />
+              </Placeholder>
+            </div>
+          </div>
+          <div
+            style={{
+              width: "1000px",
+              height: "100%",
+            }}
+          >
+            <Card.Group itemsPerRow={3}>
+              <Card>
+                <Card.Content>
+                  <Placeholder>
+                    <Placeholder.Image square />
+                  </Placeholder>
+                </Card.Content>
+              </Card>
+              <Card>
+                <Card.Content>
+                  <Placeholder>
+                    <Placeholder.Image square />
+                  </Placeholder>
+                </Card.Content>
+              </Card>
+              <Card>
+                <Card.Content>
+                  <Placeholder>
+                    <Placeholder.Image square />
+                  </Placeholder>
+                </Card.Content>
+              </Card>
+            </Card.Group>
+          </div>
+        </div>
       );
     case "detailsPost":
       return (

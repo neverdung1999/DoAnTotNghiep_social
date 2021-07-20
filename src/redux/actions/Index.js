@@ -1,6 +1,7 @@
 import * as Types from "../constants/ActionTypes";
 import CallApi from "../../utils/apiCaller";
 import Cookies from "universal-cookie";
+import _ from "lodash";
 
 const cookies = new Cookies();
 const idUser = cookies.get("user");
@@ -118,14 +119,25 @@ export const getPersonalByIdOfMe = (data) => {
   };
 };
 
-export const getPersonalByMeRequest = (setShowLoading, username) => {
+export const getPersonalByMeRequest = (
+  setShowLoading,
+  username,
+  setOpenContentFollow
+) => {
   return async (dispatch) => {
     try {
       const response = await CallApi("GET", `/user?username=${username}`, null);
       // setShowLoading(false);
+      // setOpenContentFollow && setOpenContentFollow(false);
       if (response?.status === 200) {
         dispatch(getPersonalByMe(response?.data));
-        dispatch(getPostRequestById(setShowLoading, response?.data?.id));
+        dispatch(
+          getPostRequestById(
+            setShowLoading,
+            response?.data?.id,
+            setOpenContentFollow
+          )
+        );
         idUser && dispatch(getPersonalByIdOfMeRequest(idUser));
       }
     } catch (error) {
@@ -421,7 +433,8 @@ export const getPostById = (data) => {
 export const getPostRequestByIdPost = (
   setShowLoading,
   idPost,
-  setShowLoadingComment
+  setShowLoadingComment,
+  setOpenNotFound
 ) => {
   return async (dispatch) => {
     try {
@@ -430,7 +443,9 @@ export const getPostRequestByIdPost = (
         `/post/byId?postId=${idPost}`,
         null
       );
-      // setShowLoading(false);
+      if (_.isEmpty(response?.data)) {
+        setOpenNotFound && setOpenNotFound(true);
+      }
       setShowLoadingComment && setShowLoadingComment(false);
       dispatch(getPostDetailsIndex(response?.data));
     } catch (error) {
@@ -676,7 +691,7 @@ export const deletePostRequest = (
             idAccount,
             setOpenUiUpdatePost,
             setOpenDetailsPost,
-            setOpenToast,
+            setOpenToast
           )
         );
       } else {

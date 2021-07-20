@@ -5,10 +5,11 @@ import { Link } from "react-router-dom";
 import Cookies from "universal-cookie";
 import * as Action from "../../redux/actions/Index";
 import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
-import { CircularProgress } from "diginet-core-ui/components";
+import GlobalLoading from "../animation/globalLoading/GlobalLoading";
+import { CircularProgress, LinearProgress } from "diginet-core-ui/components";
 
 function UiContentFollow(props) {
-  const { name, dataFollow, setOpenContentFollow, dataUser,dataOfMe } = props;
+  const { name, dataFollow, setOpenContentFollow, dataUser, dataOfMe } = props;
   const cookies = new Cookies();
   const userCookies = cookies.get("username");
   const [showLoading, setShowLoading] = useState(null);
@@ -26,7 +27,11 @@ function UiContentFollow(props) {
 
   const handleChangeUser = (value) => {
     setShowLoading(true);
-    props.getPersonalByMeRequest(setShowLoading, value?.username);
+    props.getPersonalByMeRequest(
+      setShowLoading,
+      value?.username,
+      setOpenContentFollow
+    );
   };
 
   const openFormUnfollow = (value) => {
@@ -42,10 +47,22 @@ function UiContentFollow(props) {
       setShowLoading,
       dataUser?.username
     );
-  };;
+  };
 
   return (
     <div>
+      {showLoading && (
+        <LinearProgress
+          color="#d82b7d"
+          duration={1}
+          height={3}
+          percent={75}
+          showValue
+          valuePosition="top"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
+        />
+      )}
+      {showLoading && <GlobalLoading />}
       <div className="backgroundContentFollow">
         {openUnfollow && (
           <UiFormUnfollow
@@ -91,7 +108,7 @@ function UiContentFollow(props) {
                           state: value,
                         }}
                         className="link_custom"
-                        onClick={() => props.onCloseForm(false)}
+                        // onClick={() => props.onCloseForm(false)}
                       >
                         <div
                           className="left_title-top"
@@ -171,8 +188,18 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getPersonalByMeRequest: (setShowLoading, username) => {
-      dispatch(Action.getPersonalByMeRequest(setShowLoading, username));
+    getPersonalByMeRequest: (
+      setShowLoading,
+      username,
+      setOpenContentFollow
+    ) => {
+      dispatch(
+        Action.getPersonalByMeRequest(
+          setShowLoading,
+          username,
+          setOpenContentFollow
+        )
+      );
     },
     followFriendRequest: (id, setShowLoading, username) => {
       dispatch(Action.followFriendRequest(id, setShowLoading, username));

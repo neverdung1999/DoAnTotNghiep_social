@@ -186,6 +186,8 @@ function Personal(props) {
     }
   };
 
+  console.log(showLoading);
+
   return (
     <div>
       <UiEditPersonal
@@ -218,6 +220,8 @@ function Personal(props) {
           style={{ position: "fixed", top: 0, left: 0, zIndex: 10000 }}
         />
       )}
+      {showLoading && <CardLoading actionTypes="personal" />}
+
       {openFormUnfollow && <UiFormUnfollow onCloseForm={onCloseForm} />}
       <div
         style={{
@@ -230,109 +234,110 @@ function Personal(props) {
       >
         {openToast && <SnackbarContent message={valueToast?.text} />}
       </div>
-
-      {ContentFollow()}
-      <div className="bodyContainer">
-        <div className="bodyContainer_top">
-          <div className="bodyContainer_top-left">
-            <div className="bodyContainer_top_left-top">
-              <img
-                src={dataUser?.imageSrc}
-                alt=""
-                id="avt_main"
-                onClick={() => onOpenChangeAvt()}
-              />
-            </div>
-          </div>
-          <div className="bodyContainer_top-right">
-            <div className="bodyContainerTop_right-top">
-              <div className="right_top-left">
-                <h2 id="top_left-h2">{dataUser?.username}</h2>
+      <div style={showLoading ? { display: "none" } : { display: "block" }}>
+        {ContentFollow()}
+        <div className="bodyContainer">
+          <div className="bodyContainer_top">
+            <div className="bodyContainer_top-left">
+              <div className="bodyContainer_top_left-top">
+                <img
+                  src={dataUser?.imageSrc}
+                  alt=""
+                  id="avt_main"
+                  onClick={() => onOpenChangeAvt()}
+                />
               </div>
-              <div className="right_top-right">
-                {idUser === dataUserApi.id ? (
-                  <div className="personal_edit">
-                    <div onClick={() => showAddNews()}>
-                      <button id="top_right-message">
-                        <i className="fas fa-plus"></i> Thêm bài viết
-                      </button>
-                    </div>
-                    <div className="right_top-edit">
-                      <div onClick={() => showEditPersonal()}>
+            </div>
+            <div className="bodyContainer_top-right">
+              <div className="bodyContainerTop_right-top">
+                <div className="right_top-left">
+                  <h2 id="top_left-h2">{dataUser?.username}</h2>
+                </div>
+                <div className="right_top-right">
+                  {idUser === dataUserApi.id ? (
+                    <div className="personal_edit">
+                      <div onClick={() => showAddNews()}>
                         <button id="top_right-message">
-                          <i className="fas fa-user-edit"></i> Chỉnh sửa trang
-                          cá nhân
+                          <i className="fas fa-plus"></i> Thêm bài viết
                         </button>
                       </div>
+                      <div className="right_top-edit">
+                        <div onClick={() => showEditPersonal()}>
+                          <button id="top_right-message">
+                            <i className="fas fa-user-edit"></i> Chỉnh sửa trang
+                            cá nhân
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ) : checkUserFollow === -1 ? (
-                  <div className="addfr">
-                    <button
-                      id="top_right-message"
-                      onClick={() => handleFollow()}
-                    >
-                      Theo dõi
-                    </button>
-                  </div>
-                ) : (
-                  <div className="addfr">
-                    <Link
-                      to={{
-                        pathname: "/chat",
-                        state: {
-                          id: dataUserApi.id,
-                          name: dataUserApi.name,
-                          username: dataUserApi.username,
-                          imageSrc: dataUserApi.imageSrc,
-                        },
-                        id: 1,
-                      }}
-                      id="top_right-message"
-                      style={{
-                        textDecoration: "none",
-                        padding: "5px 10px",
-                        fontSize: 15,
-                      }}
-                    >
-                      Nhắn tin
-                    </Link>
-                    <button
-                      id="top_right-message"
-                      onClick={() => openUnfollow()}
-                    >
-                      <i className="fas fa-user"></i> Đang theo dõi
-                    </button>
-                  </div>
-                )}
+                  ) : checkUserFollow === -1 ? (
+                    <div className="addfr">
+                      <button
+                        id="top_right-message"
+                        onClick={() => handleFollow()}
+                      >
+                        Theo dõi
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="addfr">
+                      <Link
+                        to={{
+                          pathname: "/chat",
+                          state: {
+                            id: dataUserApi.id,
+                            name: dataUserApi.name,
+                            username: dataUserApi.username,
+                            imageSrc: dataUserApi.imageSrc,
+                          },
+                          id: 1,
+                        }}
+                        id="top_right-message"
+                        style={{
+                          textDecoration: "none",
+                          padding: "5px 10px",
+                          fontSize: 15,
+                        }}
+                      >
+                        Nhắn tin
+                      </Link>
+                      <button
+                        id="top_right-message"
+                        onClick={() => openUnfollow()}
+                      >
+                        <i className="fas fa-user"></i> Đang theo dõi
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="bodyContainerTop_right-body">
-              <p id="right_body-p">
-                <span id="right_body-bold">{numberPost}</span> bài viết
-              </p>
-              {valueFollow.map((value, index) => {
-                return (
-                  <p
-                    key={index}
-                    id="right_body-p"
-                    onClick={() => showContentFollow(value.id)}
-                  >
-                    {value.name1}
-                    <span id="right_body-bold">{value.follow}</span>{" "}
-                    {value.name2}
-                  </p>
-                );
-              })}
-            </div>
-            <div className="bodyContainerTop_right-bottom">
-              <p id="right_body-bold">{dataUser?.name}</p>
-              {ReactHtmlParser(dataUser?.description)}
+              <div className="bodyContainerTop_right-body">
+                <p id="right_body-p">
+                  <span id="right_body-bold">{numberPost}</span> bài viết
+                </p>
+                {valueFollow.map((value, index) => {
+                  return (
+                    <p
+                      key={index}
+                      id="right_body-p"
+                      onClick={() => showContentFollow(value.id)}
+                    >
+                      {value.name1}
+                      <span id="right_body-bold">{value.follow}</span>{" "}
+                      {value.name2}
+                    </p>
+                  );
+                })}
+              </div>
+              <div className="bodyContainerTop_right-bottom">
+                <p id="right_body-bold">{dataUser?.name}</p>
+                {ReactHtmlParser(dataUser?.description)}
+              </div>
             </div>
           </div>
         </div>
+        {<PersonalContent idDataUserApi={dataUserApi?.id} />}
       </div>
-      {<PersonalContent idDataUserApi={dataUserApi?.id} />}
     </div>
   );
 }

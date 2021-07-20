@@ -117,7 +117,7 @@ function Header(props) {
       >
         {isOpenNoti && <Notification data={data} onCloseForm={onCloseForm} />}
         <div className="container">
-          <div className="logo">
+          <div className="logo" onClick={() => window.scrollTo(0, 0)}>
             <Link to="/">
               <img src={logo} id="logo" alt="" />
             </Link>
