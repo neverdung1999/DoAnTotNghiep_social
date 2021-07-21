@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/DoAnTotNghiep_social/static/css/main.590e6bca.chunk.css",
-    "main.js": "/DoAnTotNghiep_social/static/js/main.ddc10a10.chunk.js",
-    "main.js.map": "/DoAnTotNghiep_social/static/js/main.ddc10a10.chunk.js.map",
+    "main.js": "/DoAnTotNghiep_social/static/js/main.67195281.chunk.js",
+    "main.js.map": "/DoAnTotNghiep_social/static/js/main.67195281.chunk.js.map",
     "runtime-main.js": "/DoAnTotNghiep_social/static/js/runtime-main.44369c7a.js",
     "runtime-main.js.map": "/DoAnTotNghiep_social/static/js/runtime-main.44369c7a.js.map",
     "static/css/2.d7ff3281.chunk.css": "/DoAnTotNghiep_social/static/css/2.d7ff3281.chunk.css",
@@ -23,6 +23,6 @@
     "static/css/2.d7ff3281.chunk.css",
     "static/js/2.05dc1457.chunk.js",
     "static/css/main.590e6bca.chunk.css",
-    "static/js/main.ddc10a10.chunk.js"
+    "static/js/main.67195281.chunk.js"
   ]
 }
