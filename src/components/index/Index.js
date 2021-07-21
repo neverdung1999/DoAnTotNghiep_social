@@ -19,15 +19,13 @@ function Index(props) {
   const [showLoading, setShowLoading] = useState(false);
 
   useEffect(() => {
-    if (!cookies.get("user")) {
+    if (!cookies.get("user") || dataOfMe?.isLogin === false) {
       history.push("/login");
     }
     setShowLoading(true);
     isRender && props.personalRequest(setShowLoading, userCookies);
     setIsRender(false);
   }, [cookies, history, props, userCookies, isRender]);
-
-  console.log(dataOfMe);
 
   return (
     <div>
