@@ -180,6 +180,7 @@ function Chat(props) {
   ]);
 
   const handleChangeImg = (e) => {
+    console.log(e.target.files);
     const value = e.target.files;
     setShowLoading(true);
     if (value.length > 1) {
@@ -190,6 +191,8 @@ function Chat(props) {
       callApiImage(value[0]);
     }
   };
+
+  //CLOUDINARY_URL=cloudinary://484567344742993:f3eBrbcBAeKyFrk131936YDuS74@baby-dont-cry
 
   const callApiImage = (value) => {
     const formData = new FormData();
@@ -320,7 +323,7 @@ function Chat(props) {
   return (
     <div>
       {openFaceTime && <FaceTime dataCall={dataCall} />}
-      {showLoading && <GlobalLoading />}
+      {/* {showLoading && <GlobalLoading />} */}
       {showLoading && (
         <LinearProgress
           color="#d82b7d"
@@ -517,7 +520,7 @@ function Chat(props) {
                         <div className="showImgChoose_img" key={index}>
                           <img src={item} id="showImgChoose_img" alt="" />
                           <i
-                            class="fas fa-times"
+                            className="fas fa-times"
                             id="icon_imageChoose"
                             onClick={() => handleRemoveImage(item)}
                           ></i>

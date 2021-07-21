@@ -338,8 +338,17 @@ function DetailsPost(props) {
                     id="right_top-avt"
                   />
                 </div>
+
                 <div className="right_top-title">
-                  {dataDetailPost?.username}
+                  <Link
+                    to={{
+                      pathname: `/personal/${dataDetailPost?.username}`,
+                    }}
+                    onClick={() => handleChoose(dataDetailPost)}
+                    id="user_right-a"
+                  >
+                    {dataDetailPost?.username}
+                  </Link>
                 </div>
                 {dataDetailPost?.id_account === idCookies && (
                   <div className="right_top-function">
@@ -369,7 +378,15 @@ function DetailsPost(props) {
                   <div className="body_item-right">
                     <div className="item_right-name">
                       <a href="#" id="right_name-a">
-                        {dataDetailPost?.username}
+                        <Link
+                          to={{
+                            pathname: `/personal/${dataDetailPost?.username}`,
+                          }}
+                          onClick={() => handleChoose(dataDetailPost)}
+                          id="user_right-a"
+                        >
+                          {dataDetailPost?.username}
+                        </Link>
                       </a>
                       <p id="right_name-p">{contentPost?.content}</p>
                       <span id="right_name-span">

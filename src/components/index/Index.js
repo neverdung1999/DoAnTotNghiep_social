@@ -2,12 +2,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import "./index.css";
+import _ from "lodash";
 import Post from "../post/Post";
 import { connect } from "react-redux";
 import Cookies from "universal-cookie";
 import { Link } from "react-router-dom";
 import Suggested from "../suggested/Suggested";
 import * as actions from "../../redux/actions/Index";
+import CardLoading from "../animation/cardLoading/CardLoading";
 
 function Index(props) {
   const { history, dataUser, dataOfMe } = props;
@@ -20,41 +22,47 @@ function Index(props) {
     if (!cookies.get("user")) {
       history.push("/login");
     }
+    setShowLoading(true);
     isRender && props.personalRequest(setShowLoading, userCookies);
     setIsRender(false);
   }, [cookies, history, props, userCookies, isRender]);
+
+  console.log(dataOfMe);
 
   return (
     <div>
       <div className="body-content">
         <div className="body-container">
           <Post />
-          
+
           <div className="content-right">
             <div className="item-right">
-              <div className="right-top">
-                <div className="avt-right">
-                  <Link
-                    to={{
-                      pathname: `/personal/${dataOfMe?.username}`,
-                      state: dataUser,
-                    }}
-                  >
-                    <img src={dataOfMe?.imageSrc} alt="" id="avt-right" />
-                  </Link>
+              {_.isEmpty(dataOfMe) && <CardLoading actionTypes="suggested" />}
+              {!_.isEmpty(dataOfMe) && (
+                <div className="right-top">
+                  <div className="avt-right">
+                    <Link
+                      to={{
+                        pathname: `/personal/${dataOfMe?.username}`,
+                        state: dataUser,
+                      }}
+                    >
+                      <img src={dataOfMe?.imageSrc} alt="" id="avt-right" />
+                    </Link>
+                  </div>
+                  <div className="p-avt-right">
+                    <Link
+                      to={{
+                        pathname: `/personal/${dataOfMe?.username}`,
+                        state: dataUser,
+                      }}
+                      id="p-avt-right"
+                    >
+                      <p>{dataOfMe?.username}</p>
+                    </Link>
+                  </div>
                 </div>
-                <div className="p-avt-right">
-                  <Link
-                    to={{
-                      pathname: `/personal/${dataOfMe?.username}`,
-                      state: dataUser,
-                    }}
-                    id="p-avt-right"
-                  >
-                    <p>{dataOfMe?.username}</p>
-                  </Link>
-                </div>
-              </div>
+              )}
               <div className="right-bottom">
                 <div className="right-bottom-top">
                   <div className="suggestion">

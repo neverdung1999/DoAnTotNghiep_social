@@ -21,7 +21,7 @@ function CardLoading(props) {
             image
             style={{
               backgroundColor: "rgb(236 236 236)",
-              border: "none",
+              border: "1px solid white",
               zIndex: 1,
             }}
           >
@@ -33,7 +33,6 @@ function CardLoading(props) {
             style={{
               width: "100%",
               height: 500,
-              borderTop: "30px solid white",
             }}
           ></Placeholder.Paragraph>
           <Placeholder.Line style={{ height: "30px" }} />
@@ -130,6 +129,47 @@ function CardLoading(props) {
                 </Card.Content>
               </Card>
             </Card.Group>
+          </div>
+        </div>
+      );
+    case "suggested":
+      return (
+        <div
+          style={{
+            width: "100%",
+            height: "70px",
+            display: "flex",
+          }}
+        >
+          <div
+            style={{
+              width: "30%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Placeholder style={{ width: 60, height: 60, borderRadius: "50%" }}>
+              <Placeholder.Image />
+            </Placeholder>
+          </div>
+          <div
+            style={{ width: "70%", height: "100%", backgroundColor: "purple" }}
+          >
+            <Placeholder
+              style={{ borderBottom: "13px solid rgb(240, 242, 245)" }}
+            >
+              <Placeholder.Line
+                style={{ backgroundColor: "rgb(240, 242, 245)" }}
+              />
+              <Placeholder.Line
+                style={{ backgroundColor: "rgb(240, 242, 245)" }}
+              />
+              <Placeholder.Line
+                style={{ backgroundColor: "rgb(240, 242, 245)" }}
+              />
+            </Placeholder>
           </div>
         </div>
       );
