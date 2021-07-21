@@ -15,6 +15,7 @@ import SnackbarContent from "@material-ui/core/SnackbarContent";
 import UiContentFollow from "../uiContentFollow/UiContentFollow";
 import PersonalContent from "../personalContent/PersonalContent";
 import CardLoading from "../animation/cardLoading/CardLoading";
+import NotFound from "../notFount/NotFound";
 
 function Personal(props) {
   const { history, dataUserApi, dataPost } = props;
@@ -40,6 +41,8 @@ function Personal(props) {
   });
 
   useEffect(() => {
+    console.log(dataUserApi);
+
     if (!idUser) {
       history.push("/");
     } else {
@@ -219,7 +222,7 @@ function Personal(props) {
         />
       )}
       {showLoading && <CardLoading actionTypes="personal" />}
-
+      {!dataUserApi && <NotFound />};
       {openFormUnfollow && <UiFormUnfollow onCloseForm={onCloseForm} />}
       <div
         style={{

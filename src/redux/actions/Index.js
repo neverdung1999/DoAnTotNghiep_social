@@ -266,7 +266,6 @@ export const removeFriendRequest = (
     ).then((res) => {
       setOpenFormUnfollow(false);
       setOpenContentFollow && setOpenContentFollow(false);
-      console.log(res);
       if (res?.status === 200) {
         dispatch(suggestedAccountRequest(idUser));
         dispatch(getPersonalByMeRequest(setShowLoading, username));
@@ -297,6 +296,7 @@ export const followFriendRequest = (id, setShowLoading, username) => {
 // ------------------------------------------------------ SUGGESTED USER ------------------------------------------------------
 
 export const suggestedAccountRequest = (id) => {
+  console.log(id);
   return (dispatch) => {
     return CallApi("GET", `/user/suggestedAccounts?id=${id}`, null).then(
       (res) => {
