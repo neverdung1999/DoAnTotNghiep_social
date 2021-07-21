@@ -108,7 +108,9 @@ function Header(props) {
   };
 
   const handleOnSelect = (e) => {
-    window.location.replace(`/personal/${e?.username}`);
+    setShowLoading(true);
+    history.push(`/personal/${e?.username}`);
+    props.getPersonalByMeRequest(setShowLoading, e?.username);
   };
 
   const handleLoadLogo = () => {
