@@ -27,7 +27,6 @@ function UiUpdatePost(props) {
 
   const deletePost = () => {
     setShowLoading(true);
-    console.log(dataDetailPost);
     props.deletePostRequest(
       dataDetailPost?.id_post,
       dataDetailPost?.id_account,
@@ -47,6 +46,8 @@ function UiUpdatePost(props) {
         dataDetailPost={dataDetailPost}
         setOpenFormAddNews={setOpenFormAddNews}
         setOpenUiUpdatePost={setOpenUiUpdatePost}
+        setOpenToast={setOpenToast}
+        setValueToast={setValueToast}
       />
       {showLoading && <GlobalLoading />}
       <div className="backgroundUpdatePost">

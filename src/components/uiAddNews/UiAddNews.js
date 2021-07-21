@@ -190,7 +190,7 @@ function AddNews(props) {
               cols="30"
               rows="10"
               onChange={(e) => handleChange(e)}
-              placeholder={`${dataPost?.name} ơi, bạn đang nghĩ gì thế ?`}
+              placeholder={`${personal?.name} ơi, bạn đang nghĩ gì thế ?`}
               value={content}
             ></textarea>
           </div>

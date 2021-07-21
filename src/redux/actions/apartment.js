@@ -8,7 +8,6 @@ const idUser = cookies.get("user");
 export const getPersonalByIdOfMeRequest = (id) => {
   return async (dispatch) => {
     try {
-      console.log(id);
       const response = await CallApi(
         "GET",
         `/user?id=${id ? id : idUser}`,

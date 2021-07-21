@@ -39,8 +39,6 @@ function Personal(props) {
     text: null,
   });
 
-  console.log(dataUserApi);
-
   useEffect(() => {
     if (!idUser) {
       history.push("/");
@@ -105,9 +103,6 @@ function Personal(props) {
     username,
     dataPost,
   ]);
-
-  console.log(dataUser);
-
 
   const valueFollow = [
     {
@@ -190,8 +185,6 @@ function Personal(props) {
         return openContentFollow && <UiContentFollow />;
     }
   };
-
-  console.log(showLoading);
 
   return (
     <div>

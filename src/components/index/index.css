@@ -67,6 +67,11 @@
     height: 100vh;
     margin: 5%;
     padding-bottom: 115px;
+    overflow: auto;
+}
+
+.item-right::-webkit-scrollbar {
+    display: none;
 }
 
 .right-top{

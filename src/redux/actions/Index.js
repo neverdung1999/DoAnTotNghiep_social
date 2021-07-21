@@ -20,7 +20,6 @@ export const loginUserRequest = (
       password: valueInputPassword,
     })
       .then((res) => {
-        console.log(res);
         setShowLoading(false);
         dispatch(loginUser(res, history));
       })
@@ -49,8 +48,7 @@ export const removeState = () => {
 export const logOutRequest = (id) => {
   return async (dispatch) => {
     try {
-      console.log(id);
-      const results = await CallApi("PUT", `/user/signIn?id=${id}`, null);
+      await CallApi("PUT", `/user/signIn?id=${id}`, null);
     } catch (error) {
       console.log(error);
     }
@@ -181,7 +179,6 @@ export const personalById = (data, setShowLoading) => {
 
 export const personalRequest = (setShowLoading, username) => {
   return (dispatch) => {
-    console.log(username);
     return CallApi("GET", `/user?username=${username}`, null)
       .then((response) => {
         setShowLoading(false);
@@ -215,7 +212,6 @@ export const changeAvtRequest = (
 ) => {
   return async (dispatch) => {
     try {
-      console.log(reponseObject);
       const response = await CallApi("PUT", "/user", reponseObject);
       setOpenToast(true);
       if (response?.data === "success") {
@@ -302,7 +298,6 @@ export const followFriendRequest = (id, setShowLoading, username) => {
 
 export const suggestedAccountRequest = (id) => {
   return (dispatch) => {
-    console.log(id);
     return CallApi("GET", `/user/suggestedAccounts?id=${id}`, null).then(
       (res) => {
         dispatch(suggestedAccounts(res));
@@ -415,10 +410,9 @@ export const getLoadmorePostRequest = (
 ) => {
   return async (dispatch) => {
     try {
-      const response = await CallApi(
-        "GET",
-        `/post?id=${idUser}&timestamp=${timestamp}`
-      );
+      const response =
+        timestamp &&
+        (await CallApi("GET", `/post?id=${idUser}&timestamp=${timestamp}`));
       setShowLoadingLoadmore && setShowLoadingLoadmore(false);
       setOpenToast && setOpenToast(true);
       if (response?.status === 200 && !_.isEmpty(response?.data)) {
@@ -558,6 +552,8 @@ export const updatePostRequest = (
           setOpenToast && setOpenToast(false);
         }, 6000);
         dispatch(getPostRequest(setShowLoading, idUser));
+        dispatch(getPostRequestById(setShowLoading, idUser));
+        dispatch(getPostRequestByIdPost(setShowLoading, id));
       }
     } catch (error) {
       console.log(error);
@@ -779,7 +775,6 @@ export const removeCommentRequest = (
       id_comment: idComment,
       id_reply: idReply,
     });
-    console.log(response);
     if (response?.status === 200) {
       setShowLoading && setShowLoading(false);
       setOpenUpdateCmt && setOpenUpdateCmt(false);

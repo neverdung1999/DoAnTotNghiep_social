@@ -140,7 +140,7 @@ i {
   height: 100%;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 100;
+  z-index: 10;
 }
 
 .backgroundPost_form {

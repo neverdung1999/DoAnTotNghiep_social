@@ -87,8 +87,8 @@ function DetailsPost(props) {
         if (id === undefined) return data;
         await usersRef.child(id).once("value", (snap) => {
           if (snap.val() !== null) {
-            const { username, imageSrc } = snap.val();
-            data = { username, accountImage: imageSrc };
+            const { username, imageSrc, name } = snap.val();
+            data = { name, username, accountImage: imageSrc };
           }
         });
         return data;
@@ -152,8 +152,6 @@ function DetailsPost(props) {
       console.log(error);
     }
   }, [isRender, dataDetailsPost, idCookies, props, getDetailPost]);
-
-  console.log(dataDetailPost);
 
   const onCloseFrom = (e) => {
     props.onCloseForm();
@@ -296,7 +294,7 @@ function DetailsPost(props) {
           position: "fixed",
           bottom: 70,
           left: 50,
-          zIndex: 9999,
+          zIndex: 99,
         }}
       >
         {openToastDetails && (

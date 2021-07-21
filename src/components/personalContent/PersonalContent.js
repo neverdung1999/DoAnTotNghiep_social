@@ -43,6 +43,7 @@ function PersonalContent(props) {
           position: "fixed",
           bottom: 70,
           left: 50,
+          zIndex: 99,
         }}
       >
         {openToast && <SnackbarContent message={valueToast?.text} />}

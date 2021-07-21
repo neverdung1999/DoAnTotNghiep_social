@@ -93,7 +93,6 @@ function Chat(props) {
           .on("value", (snapshot) => {
             if (snapshot.val() !== null) {
               for (const [key, value] of Object.entries(snapshot.val())) {
-                console.log(value);
                 if (_.size(value?.containId) === 2) {
                   for (const [keyId, valueId] of Object.entries(
                     value?.containId
@@ -120,8 +119,6 @@ function Chat(props) {
                         }
                       }
                     }
-
-                    console.log(arrTemp);
 
                     setDataFriend(
                       _.uniqWith(
@@ -157,7 +154,6 @@ function Chat(props) {
               setRoomId("");
             }
           });
-        arrTemp = [];
       };
 
       getDataChatRequest();
@@ -314,10 +310,7 @@ function Chat(props) {
     setOpenFaceTime(true);
   };
 
-  console.log(imgChoose);
-
   const handleRemoveImage = (image) => {
-    console.log(image);
     let arrImgClone = [...imgChoose];
     const results = arrImgClone.findIndex((img) => img === image);
     arrImgClone.splice(results, 1);

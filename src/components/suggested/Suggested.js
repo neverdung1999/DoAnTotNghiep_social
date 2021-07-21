@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./suggested.css";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -6,15 +6,9 @@ import * as actions from "../../redux/actions/Index";
 import { CircularProgress } from "diginet-core-ui/components";
 
 function Suggested(props) {
-  const { dataSuggested, dataPersonal } = props;
+  const { dataSuggested } = props;
   const [idChoose, setIdChoose] = useState("");
   const [showLoading, setShowLoading] = useState(false);
-
-  useEffect(() => {
-    dataPersonal?.following?.findIndex((value) => console.log(value));
-  });
-
-  console.log(dataSuggested);
 
   const handleFollow = (e) => {
     setShowLoading(true);
