@@ -2,20 +2,18 @@ import React, { useState } from "react";
 import "./uiContentFollow.css";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import Cookies from "universal-cookie";
 import * as Action from "../../redux/actions/Index";
 import UiFormUnfollow from "../uiFormUnfollow/UiFormUnfollow";
 import GlobalLoading from "../animation/globalLoading/GlobalLoading";
 import { CircularProgress, LinearProgress } from "diginet-core-ui/components";
 
 function UiContentFollow(props) {
-  const { name, dataFollow, setOpenContentFollow, dataUser, dataOfMe } = props;
-  const cookies = new Cookies();
-  const userCookies = cookies.get("username");
+  const { name, dataFollow, setOpenContentFollow, dataOfMe } = props;
+  const [idChoose, setIdChoose] = useState("");
   const [showLoading, setShowLoading] = useState(null);
   const [dataUnFollow, setDataUnFollow] = useState(null);
   const [openUnfollow, setOpenUnfollow] = useState(false);
-  const [idChoose, setIdChoose] = useState("");
+  const [showLoadingFollow, setShowLoadingFollow] = useState(false);
 
   const closeForm = () => {
     props.onCloseForm(false);
@@ -40,12 +38,13 @@ function UiContentFollow(props) {
   };
 
   const handleFollow = (value) => {
-    setShowLoading(true);
+    setShowLoadingFollow(true);
     setIdChoose(value?.id_account);
     props.followFriendRequest(
       value?.id_account,
-      setShowLoading,
-      dataUser?.username
+      setShowLoadingFollow,
+      dataOfMe?.username,
+      dataOfMe?.id
     );
   };
 
@@ -91,84 +90,90 @@ function UiContentFollow(props) {
                 (item) => item?.id_account === value.id_account
               );
               return (
-                <div key={index} className="form_bottom-all">
-                  <div className="form_bottom-left">
-                    <div className="bottom_left-avt">
-                      <img
-                        src={value?.imageSrc}
-                        alt=""
-                        id="bottom_left-avt"
-                        onClick={() => handleChangeUser(value)}
-                      />
-                    </div>
-                    <div className="bottom_left-title">
-                      <Link
-                        to={{
-                          pathname: `/personal/${dataFollow[index]?.username}`,
-                          state: value,
-                        }}
-                        className="link_custom"
-                        // onClick={() => props.onCloseForm(false)}
-                      >
-                        <div
-                          className="left_title-top"
-                          onClick={() => handleChangeUser(value)}
-                        >
-                          <p>{value?.username}</p>
+                <div key={index}>
+                  {value?.username && (
+                    <div className="form_bottom-all">
+                      <div className="form_bottom-left">
+                        <div className="bottom_left-avt">
+                          <img
+                            src={value?.imageSrc}
+                            alt=""
+                            id="bottom_left-avt"
+                            onClick={() => handleChangeUser(value)}
+                          />
                         </div>
-                      </Link>
+                        <div className="bottom_left-title">
+                          <Link
+                            to={{
+                              pathname: `/personal/${dataFollow[index]?.username}`,
+                              state: value,
+                            }}
+                            className="link_custom"
+                            // onClick={() => props.onCloseForm(false)}
+                          >
+                            <div
+                              className="left_title-top"
+                              onClick={() => handleChangeUser(value)}
+                            >
+                              <p>{value?.username}</p>
+                            </div>
+                          </Link>
 
-                      <div className="left_title-bottom">
-                        <p>{value?.name}</p>
+                          <div className="left_title-bottom">
+                            <p>{value?.name}</p>
+                          </div>
+                          {showLoadingFollow && idChoose === value?.id_account && (
+                            <CircularProgress
+                              color="#f26e41"
+                              direction="bottom"
+                              percent={100}
+                              percentColor="#0095ff"
+                              size="extraSmall"
+                              strokeWidth={10}
+                              style={{
+                                position: "absolute",
+                                top: 15,
+                                right: 0,
+                                fontSize: 10,
+                                zIndex: 10000,
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                      {showLoading && idChoose === value?.id_account && (
-                        <CircularProgress
-                          color="#f26e41"
-                          direction="bottom"
-                          percent={100}
-                          percentColor="#0095ff"
-                          size="extraSmall"
-                          strokeWidth={10}
-                          style={{
-                            position: "absolute",
-                            top: 15,
-                            right: 0,
-                            fontSize: 10,
-                            zIndex: 10000,
-                          }}
-                        />
-                      )}
+                      <div className="form_bottom-right">
+                        {checkFollowTemp !== -1 ? (
+                          <p
+                            id="bottom_right-delete"
+                            onClick={
+                              !showLoading
+                                ? () => openFormUnfollow(value)
+                                : null
+                            }
+                          >
+                            Đang theo dõi
+                          </p>
+                        ) : (
+                          value.id_account !== dataOfMe?.id && (
+                            <p
+                              id="bottom_right-delete"
+                              onClick={
+                                !showLoading ? () => handleFollow(value) : null
+                              }
+                              style={{
+                                backgroundColor: "rgb(0, 149, 246)",
+                                color: "white",
+                                border: "none",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Theo dõi
+                            </p>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="form_bottom-right">
-                    {checkFollowTemp !== -1 ? (
-                      <p
-                        id="bottom_right-delete"
-                        onClick={
-                          !showLoading ? () => openFormUnfollow(value) : null
-                        }
-                      >
-                        Đang theo dõi
-                      </p>
-                    ) : (
-                      value.username !== userCookies && (
-                        <p
-                          id="bottom_right-delete"
-                          onClick={
-                            !showLoading ? () => handleFollow(value) : null
-                          }
-                          style={{
-                            backgroundColor: "rgb(0, 149, 246)",
-                            color: "white",
-                            border: "none",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          Theo dõi
-                        </p>
-                      )
-                    )}
-                  </div>
+                  )}
                 </div>
               );
             })}
@@ -201,8 +206,10 @@ const mapDispatchToProps = (dispatch) => {
         )
       );
     },
-    followFriendRequest: (id, setShowLoading, username) => {
-      dispatch(Action.followFriendRequest(id, setShowLoading, username));
+    followFriendRequest: (id, setShowLoading, username, idUser) => {
+      dispatch(
+        Action.followFriendRequest(id, setShowLoading, username, idUser)
+      );
     },
   };
 };

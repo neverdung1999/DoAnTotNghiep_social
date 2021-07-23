@@ -278,10 +278,11 @@ export const removeFriendRequest = (
 
 // ------------------------------------------------------  FOLLOW FRIEND ------------------------------------------------------
 
-export const followFriendRequest = (id, setShowLoading, username) => {
+export const followFriendRequest = (id, setShowLoading, username, idUser) => {
   return (dispatch) => {
     return CallApi("POST", `/user/follow?myId=${idUser}&followingId=${id}`)
       .then((res) => {
+        console.log(res);
         if (res?.status === 200) {
           dispatch(suggestedAccountRequest(idUser));
           dispatch(getPersonalByMeRequest(setShowLoading, username));
@@ -454,7 +455,6 @@ export const getPostRequestById = (
       setOpenUiUpdatePost && setOpenUiUpdatePost(false);
       setOpenDetailsPost && setOpenDetailsPost(false);
       setOpenToast && setOpenToast(true);
-
       setTimeout(() => {
         setOpenToast && setOpenToast(false);
       }, 6000);
@@ -492,6 +492,7 @@ export const getPostRequestByIdPost = (
       if (_.isEmpty(response?.data)) {
         setOpenNotFound && setOpenNotFound(true);
       }
+      setShowLoading && setShowLoading(false);
       setShowLoadingComment && setShowLoadingComment(false);
       dispatch(getPostDetailsIndex(response?.data));
     } catch (error) {

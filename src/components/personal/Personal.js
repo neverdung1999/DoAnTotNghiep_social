@@ -18,7 +18,7 @@ import CardLoading from "../animation/cardLoading/CardLoading";
 import NotFound from "../notFount/NotFound";
 
 function Personal(props) {
-  const { history, dataUserApi, dataPost } = props;
+  const { history, dataUserApi, dataPost, dataOfMe } = props;
   const cookies = new Cookies();
   const idUser = cookies.get("user");
   const username = cookies.get("username");
@@ -34,6 +34,7 @@ function Personal(props) {
   const [openFromAddNews, setOpenFormAddNews] = useState(false);
   const [openFormUnfollow, setOpenFormUnfollow] = useState(false);
   const [openEditPersonal, setOpenEditPersonal] = useState(false);
+  const [showLoadingFollow, setShowLoadingFollow] = useState(false);
   const [openContentFollow, setOpenContentFollow] = useState(false);
   const [openToast, setOpenToast] = useState(false);
   const [valueToast, setValueToast] = useState({
@@ -41,7 +42,7 @@ function Personal(props) {
   });
 
   useEffect(() => {
-    console.log(dataUserApi);
+    console.log(showLoadingFollow);
 
     if (!idUser) {
       history.push("/");
@@ -148,11 +149,12 @@ function Personal(props) {
   };
 
   const handleFollow = () => {
-    setShowLoading(true);
+    setShowLoadingFollow(true);
     props.followFriendRequest(
       dataUserApi.id,
-      setShowLoading,
-      dataUserApi?.username
+      setShowLoadingFollow,
+      dataUserApi?.username,
+      dataOfMe?.id
     );
   };
 
@@ -210,7 +212,7 @@ function Personal(props) {
         setOpenToast={setOpenToast}
         setValueToast={setValueToast}
       />
-      {showLoading && (
+      {showLoadingFollow && (
         <LinearProgress
           color="#d82b7d"
           duration={1}
@@ -348,6 +350,7 @@ const mapStateToProps = (state) => {
     dataUserApi: state.MyPersonal,
     dataPost: state.PostById,
     dataUser: state.User,
+    dataOfMe: state.PersonalOfMe,
   };
 };
 
@@ -356,8 +359,10 @@ const mapDispatchToProps = (dispatch) => {
     getPersonalByMeRequest: (setShowLoading, username) => {
       dispatch(Action.getPersonalByMeRequest(setShowLoading, username));
     },
-    followFriendRequest: (id, setShowLoading, username) => {
-      dispatch(Action.followFriendRequest(id, setShowLoading, username));
+    followFriendRequest: (id, setShowLoading, username, idUser) => {
+      dispatch(
+        Action.followFriendRequest(id, setShowLoading, username, idUser)
+      );
     },
   };
 };

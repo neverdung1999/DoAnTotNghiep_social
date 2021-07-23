@@ -1,7 +1,5 @@
 import * as Types from "../constants/ActionTypes";
-import Cookies from "universal-cookie";
 
-const cookies = new Cookies();
 let initialState = [];
 
 const MyUser = (state = initialState, action) => {

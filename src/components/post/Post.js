@@ -314,7 +314,7 @@ function Post(props) {
               );
             })
           ))}
-        {!showLoading && (
+        {!showLoading && !_.isEmpty(dataPost) && (
           <div className="loadmore" onClick={() => handleLoadmore()}>
             Xem thêm <i className="fas fa-chevron-down" id="loadmoreIcon"></i>{" "}
             {showLoadingLoadmore && (
@@ -340,6 +340,7 @@ function Post(props) {
     </div>
   );
 }
+
 
 const mapStateToProps = (state) => {
   return {

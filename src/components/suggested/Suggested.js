@@ -8,14 +8,22 @@ import { CircularProgress } from "diginet-core-ui/components";
 import CardLoading from "../animation/cardLoading/CardLoading";
 
 function Suggested(props) {
-  const { dataSuggested } = props;
+  const { dataSuggested, dataUser } = props;
   const [idChoose, setIdChoose] = useState("");
   const [showLoading, setShowLoading] = useState(false);
 
+  console.log(dataUser);
+
   const handleFollow = (e) => {
+    console.log(e);
     setShowLoading(true);
     setIdChoose(e.id);
-    props.followFriendRequest(e.id, setShowLoading);
+    props.followFriendRequest(
+      e.id,
+      setShowLoading,
+      dataUser?.username,
+      dataUser?.id
+    );
   };
 
   return (
@@ -54,7 +62,7 @@ function Suggested(props) {
                     style={{
                       position: "absolute",
                       top: -4,
-                      right: -30,
+                      right: 10,
                       fontSize: 10,
                       zIndex: 10000,
                     }}
@@ -72,6 +80,7 @@ const mapStateToProps = (state) => {
   return {
     dataSuggested: state.Home,
     dataPersonal: state.MyPersonal,
+    dataUser: state.PersonalOfMe,
   };
 };
 
@@ -80,8 +89,10 @@ const mapDispatchToProps = (dispatch) => {
     suggestedAccountRequest: (id) => {
       dispatch(actions.suggestedAccountRequest(id));
     },
-    followFriendRequest: (id, setShowLoading) => {
-      dispatch(actions.followFriendRequest(id, setShowLoading));
+    followFriendRequest: (id, setShowLoading, username, idUser) => {
+      dispatch(
+        actions.followFriendRequest(id, setShowLoading, username, idUser)
+      );
     },
   };
 };
